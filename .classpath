@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry path="" kind="src"/>
 	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
-	<classpathentry path="D:/Coding/icfp07/ropes-1.1.3/ropes.jar" kind="lib"/>
+	<classpathentry path="D:/Coding/EndoMorpher/resources/ropes.jar" kind="lib"/>
 	<classpathentry path="" kind="output"/>
 </classpath>
