@@ -166,6 +166,28 @@ public class DnaToRna {
 	   *      As we process, store the results of our processed DNA in one place (the template)
 	   *     and remove what we've processed from the DNA string.
 	   * 
+	   * - matchreplace(p,t) : [Attempts to match a pattern to part of the DNA string then replace
+	   *                        appropriate parts of the match with a template]
+	   *     Loop through the supplied pattern, keeping track of the parts it is comparing it to
+	   *     in the DNA, until we reach a part of the pattern that does not match (stop the
+	   *     matching and return to processing pattern-template-matchreplace).
+	   *      As we process, keep track of where we are in the DNA string. When we come to the start
+	   *     of groups (parts of the pattern where ( starts and ) ends them), store the index of the
+	   *     start of that group; when we come to the end of groups, add the string of bases that 
+	   *     were in that group to a list of "environments" that will be modified.
+	   *      If we get through the whole pattern without stopping the matching, remove what we've
+	   *     processed from the DNA string, and replace the environments with the templates using
+	   *     replace().
+	   *     
+	   * - replace(t,e) : [Uses the contents of matched base strings to make a replacement DNA string
+	   *                   to prepend to the existing DNA string]
+	   *     Loop through the supplied template.
+	   *      As we process, keep track of what we need to add to the replacement; this will either be
+	   *     bases, repeatedly-quoted versions of matched base strings, or lengths of matched base
+	   *     strings encoded as DNA.
+	   *      Once we have got through the supplied template, prepend the DNA to be added to the
+	   *     existing DNA string.  
+	   * 
 	   * - nat() : [Decodes a natural number]
 	   *     Loop through DNA until we reach a code telling us it's the end of the number
 	   *     we're reading, or until we run out of DNA (trash the pattern and number and go
@@ -176,13 +198,28 @@ public class DnaToRna {
 	   *     calls to the same method (even though this is the way it is specified, it's unlikely
 	   *     to be the best idea).
 	   * 
+	   * - asnat() : [Encodes a natural number]
+	   *     Take a natural number and returns a representation of it encoded in DNA form.
+	   *      Numbers are in binary with most significant bit last, and terminated with P.
+	   *     So, for example, decimal 10 (binary 1010) would be stored as ICICP, and decimal 25
+	   *     (binary 11001) would be stored as CIICCP.
+	   *      TODO: As with nat(), figure out a non-recursive way of doing this.
+	   * 
 	   * - consts() : [Decodes a sequence of bases]
 	   *     Loop through DNA until we reach a code we don't recognise or until we run out of DNA
 	   *     (return to whatever called this method).
 	   *      As with pattern() and nat(), as we process, store the results of our processed DNA
 	   *     in one place (the decoded DNA) and remove what we've processed from the DNA string.
 	   *      TODO: As with nat(), figure out how to store the decoded DNA in a way that doesn't
-	   *     involve recursive calls to the same method.  
+	   *     involve recursive calls to the same method.
+	   * 
+	   * - protect(l,d) : [Repeatedly encodes a sequence of bases using quote()]
+	   *     Call the quote() method on d repeatedly until it's been done l times. (This is in the 
+	   *     spec as recursive, but can easily be made iterative.)
+	   * 
+	   * - quote() : [Encode a sequence of bases]
+	   *     Go through all the bases in a DNA string, turning them into their "quoted" forms. (As
+	   *     for protect(), this is in the spec as recursive but can easily be made iterative.)
 	   */
 
 	
