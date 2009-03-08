@@ -39,40 +39,6 @@ public class EndoMorpher {
 	  
   }
   
-  private Rope consts()
-  {
-    char charFirst = DNA.charAt(0);
-    switch (charFirst)
-    {
-      case 'C':
-        DNA = DNA.delete(0,0);
-        return consts().insert(0,"I");
-      case 'F':
-        DNA = DNA.delete(0,0);
-        return consts().insert(0,"C");
-      case 'P':
-        DNA = DNA.delete(0,0);
-        return consts().insert(0,"F");
-      case 'I':
-        char charSecond = DNA.charAt(1);
-        switch (charSecond)
-        {
-          case 'C':
-            DNA = DNA.delete(0,1);
-            return consts().insert(0,"P");
-          default:
-            return e;
-        }
-      default:
-        return e;
-    }
-  }
-
-  private void finish()
-  {
-    // Outputs RNA string.
-  }
-
   public void build()
   {
 
