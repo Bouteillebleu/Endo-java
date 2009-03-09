@@ -1,4 +1,11 @@
+package source;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
 
 import org.ahmadsoft.ropes.Rope;
 import org.ahmadsoft.ropes.RopeBuilder;
@@ -6,21 +13,47 @@ import org.ahmadsoft.ropes.RopeBuilder;
 
 public class DnaToRna {
 
-	  private static RopeBuilder rb = new RopeBuilder();
-	  public static final Rope e = rb.build("");
-	  private Rope DNA = e;
-	  private Rope RNA = e;
-	  private boolean finish = false;
+	private static RopeBuilder rb = new RopeBuilder();
+	public static final Rope e = rb.build("");
+	private Rope DNA = e;
+	private Rope RNA = e;
+	private boolean finish = false;
 	  
-	  public DnaToRna(String input)
+	public DnaToRna(String prefix, String endoZipFilename)
+	{
+	  try {
+	    BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(endoZipFilename))));
+		String inputDNA = new String(prefix);
+		String line = in.readLine();
+		while (line != null)
+		{
+		  inputDNA = inputDNA.concat(line);
+		  in.readLine();
+		}
+		  this.DNA = rb.build(inputDNA);			  
+	  } catch (IOException e) {
+	    System.out.println("Problem with reading from Endo's DNA file.");
+	  }  
+	}
+	
+	/*
+	 * Get the current contents of DNA. Used for testing.
+	 */
+	public Rope getDNA()
+	{
+		return DNA;
+	}
+
+	/*
+	 * Get the current contents of RNA. Used for testing.
+	 */
+	public Rope getRNA()
+	{
+		return RNA;
+	}
+
+	public void execute()
 	  {
-		  this.DNA = rb.build(input);
-	  }
-	  
-	  public void execute()
-	  {
-	    // We already set DNA to the prefix + Endo's base in main().
-	    // So now let's repeat.
 	    while(!finish)
 	    {
 	      // Define a pattern type, set it to p.
