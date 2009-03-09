@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 import org.ahmadsoft.ropes.Rope;
 import org.ahmadsoft.ropes.RopeBuilder;
@@ -18,21 +18,25 @@ public class DnaToRna {
 	private Rope DNA = e;
 	private Rope RNA = e;
 	private boolean finish = false;
-	  
+	
+	/*
+	 * TODO: Sort out how to do this with the Zip input stream reader?
+	 */
 	public DnaToRna(String prefix, String endoZipFilename)
 	{
 	  try {
-	    BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(endoZipFilename))));
-		String inputDNA = new String(prefix);
-		String line = in.readLine();
-		while (line != null)
+		//BufferedReader in = new BufferedReader(new InputStreamReader(new ZipInputStream(new FileInputStream(endoZipFilename))));
+	    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(endoZipFilename)));
+		StringBuilder buildingDNA = new StringBuilder();
+		buildingDNA.append(prefix);
+		while (in.ready())
 		{
-		  inputDNA = inputDNA.concat(line);
-		  in.readLine();
+		  buildingDNA.append((char)in.read());
 		}
-		  this.DNA = rb.build(inputDNA);			  
+		this.DNA = rb.build(buildingDNA.toString());
 	  } catch (IOException e) {
 	    System.out.println("Problem with reading from Endo's DNA file.");
+	    e.printStackTrace();
 	  }  
 	}
 	
@@ -68,10 +72,6 @@ public class DnaToRna {
 	  }
 	  
 	  /*
-	   * What methods do we need?
-	   */
-	  
-	  /*
 	   * - pattern() : [Specifies a pattern for pattern-matching]
 	   *     Loop through DNA until we reach a code telling us it's the end of the pattern, 
 	   *     or until we reach an unrecognised code (this means we trash the pattern and go
@@ -92,7 +92,6 @@ public class DnaToRna {
 	    int level = 0;
 	    while(!finish)
 	    {
-	      // Let's have some sort of crazy nested switch statement here.
 	      char charFirst = DNA.charAt(0);
 	      switch (charFirst)
 	      {
@@ -118,12 +117,9 @@ public class DnaToRna {
 	              break;
 	            case 'P':
 	              DNA = DNA.delete(0,1);
-	              // Interpret the next thing in the DNA string
-	              // as a natural number.
 	              int n = nat();
 	              if (finish) break;
-	              // Add an instruction to p -
-	              // "skip the next n bases".
+	              // Add "Skip the next n bases".
 	              // We can do this with the regex ".{n}".
 	              p = p.append(".{");
 	              p = p.append(Integer.toString(n));
@@ -131,15 +127,10 @@ public class DnaToRna {
 	              break;	      
 	            case 'F':
 	              DNA = DNA.delete(0,2);
-	              // Interpret the next thing in the DNA string
-	              // as an encoded sequence of bases.
+	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
-	              // Add an instruction to p -
-	              // "search for the sequence s".
-	              //
-	              // I need to check what exactly this does,
-	              // but under the interpretation I think it has,
-	              // we can do this with the regex ".*?" and then s.
+	              // Add "Search for the sequence s".
+	              // We can do this with the regex ".*?" and then s.
 	              p = p.append(".*?");
 	              p = p.append(s);
 	              break;
