@@ -19,6 +19,12 @@ public class DnaToRna {
 	private Rope RNA = e;
 	private boolean finish = false;
 	
+	// Default constructor that takes no arguments. For testing.
+	public DnaToRna()
+	{
+		return;
+	}
+	
 	/*
 	 * TODO: Sort out how to do this with the Zip input stream reader?
 	 */
@@ -46,6 +52,14 @@ public class DnaToRna {
 	public Rope getDNA()
 	{
 		return DNA;
+	}
+	
+	/*
+	 * Set DNA to a different value. Used for testing (so as to not rely on file reading).
+	 */
+	public void setDNA(String newDNA)
+	{
+		this.DNA = rb.build(newDNA);
 	}
 
 	/*
