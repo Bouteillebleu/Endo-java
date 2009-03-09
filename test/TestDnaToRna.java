@@ -39,4 +39,13 @@ public class TestDnaToRna extends TestCase {
 		Assert.assertEquals("ICFPICFPICFP",dna2rna.getDNA().toString());
 	}
 
+	/*
+	 * Test 1 from Figure 8 of spec for the pattern() algorithm.
+	 */
+	public void testPattern_test1()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("CIIC");
+		Assert.assertEquals("I",dna2rna.pattern().toString());
+	}
 }
