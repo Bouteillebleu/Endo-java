@@ -99,6 +99,10 @@ public class DnaToRna {
 	   *     CHOSEN: Go for regex notation at the moment. If it turns out to be unsustainable,
 	   *     reconsider and replan; for now, we'll just match it with the built in Ropes regex
 	   *     matcher in matchreplace().
+	   *     
+	   *     GOTCHA: Ropes.delete(start,end) deletes from position start
+	   *     to position end-1 (thus delete(0,0) does nothing and causes
+	   *     infinite loop). This is not helpful.
 	   */
 	  public Rope pattern()
 	  {
@@ -110,15 +114,15 @@ public class DnaToRna {
 	      switch (charFirst)
 	      {
 	        case 'C':
-	          DNA = DNA.delete(0,0);
+	          DNA = DNA.delete(0,1);
 	          p = p.append("I");
 	          break;	  
 	        case 'F':
-	          DNA = DNA.delete(0,0);
+	          DNA = DNA.delete(0,1);
 	          p = p.append("C");
 	          break;
 	        case 'P':
-	          DNA = DNA.delete(0,0);
+	          DNA = DNA.delete(0,1);
 	          p = p.append("F");
 	          break;
 	        case 'I':
@@ -126,11 +130,11 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
-	              DNA = DNA.delete(0,0);
+	              DNA = DNA.delete(0,1);
 	              p = p.append("P");
 	              break;
 	            case 'P':
-	              DNA = DNA.delete(0,1);
+	              DNA = DNA.delete(0,2);
 	              int n = nat();
 	              if (finish) break;
 	              // Add "Skip the next n bases".
@@ -140,7 +144,7 @@ public class DnaToRna {
 	              p = p.append("}");
 	              break;	      
 	            case 'F':
-	              DNA = DNA.delete(0,2);
+	              DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
 	              // Add "Search for the sequence s".
@@ -153,7 +157,7 @@ public class DnaToRna {
 	              switch (charThird)
 	              {
 	                case 'P':
-	                  DNA = DNA.delete(0,2);
+	                  DNA = DNA.delete(0,3);
 	                  level++;
 	                  p = p.append("(");
 	                  break;
@@ -164,7 +168,7 @@ public class DnaToRna {
 	                  break;
 	                case 'I':
 	                  RNA = RNA.append(DNA.subSequence(3,9));
-	                  DNA = DNA.delete(0,9);
+	                  DNA = DNA.delete(0,10);
 	                  break;
 	                default:
 	                  finish = true;
