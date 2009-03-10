@@ -130,7 +130,7 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
-	              DNA = DNA.delete(0,1);
+	              DNA = DNA.delete(0,2);
 	              p = p.append("P");
 	              break;
 	            case 'P':
@@ -163,8 +163,9 @@ public class DnaToRna {
 	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
+	                  DNA = DNA.delete(0,3);
 	                  if (level == 0) return p;
-	                  else level--;
+	                  else { level--; p = p.append(")"); }
 	                  break;
 	                case 'I':
 	                  RNA = RNA.append(DNA.subSequence(3,9));
@@ -240,29 +241,60 @@ public class DnaToRna {
 	   *     to output the RNA).
 	   *      As with pattern(), as we process, store the results of our processed DNA in one 
 	   *     place (the number) and remove what we've processed from the DNA string.
-	   *      TODO: Figure out how to store the number in a way that doesn't involve recursive
-	   *     calls to the same method (even though this is the way it is specified, it's unlikely
-	   *     to be the best idea).
 	   */
-	  private int nat()
+	  public int nat()
 	  {
-	    char charStart = DNA.charAt(0);
-	    switch (charStart)
-	    {
-	      case 'P':
-	        DNA = DNA.delete(0,0);
-	        return 0;
-	      case 'I': /* FALL THRU */
-	      case 'F':
-	        DNA = DNA.delete(0,0);
-	        return 2*nat();
-	      case 'C':
-	        DNA = DNA.delete(0,0);
-	        return(2*nat())+1;
-	      default:
-	        finish = true;
-	        return 0;
-	    }
+		  // Iterative version. Read up to number terminator, then process rope.
+		  StringBuilder buildingNumber = new StringBuilder();
+		  while(DNA.length() > 0 && DNA.charAt(0)!='P')
+		  {
+			  buildingNumber.append(DNA.charAt(0));
+			  DNA = DNA.delete(0,1);
+		  }
+		  if (DNA.length() == 0)
+		  {
+			  finish = true;
+			  return 0;
+		  }
+		  DNA = DNA.delete(0,1); // to remove the terminating P...
+		  Rope number = rb.build(buildingNumber); // ...which this rope doesn't include.
+		  if (number.equals(e))
+		  {
+			  return 0;
+		  }
+		  else
+		  {
+			  int value = 0;
+			  for (int pos=0; pos<number.length(); pos++)
+			  {
+				  if (number.charAt(pos)=='C')
+					  value += Math.pow(2, pos); // Need an integer version.
+			  }
+			  return value;
+		  }
+		  
+		/*
+		 * Recursive version, as specified in the report:
+		 * 
+		 * char charStart = DNA.charAt(0);
+	     * switch (charStart)
+	     * {
+	     *   case 'P':
+	     *     DNA = DNA.delete(0,1);
+	     *     return 0;
+	     *   case 'I': FALL THRU
+	     *   case 'F':
+	     *     DNA = DNA.delete(0,1);
+	     *     return 2*nat();
+	     *   case 'C':
+	     *     DNA = DNA.delete(0,1);
+	     *     return(2*nat())+1;
+	     *   default:
+	     *     finish = true;
+	     *     return 0;
+	     * }
+		 */
+	    
 	  }
 
 	  /*

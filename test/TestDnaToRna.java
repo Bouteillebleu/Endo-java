@@ -48,4 +48,43 @@ public class TestDnaToRna extends TestCase {
 		dna2rna.setDNA("CIIC");
 		Assert.assertEquals("I",dna2rna.pattern().toString());
 	}
+	
+	/*
+	 * Test 2 from Figure 8 of spec for the pattern() algorithm.
+	 */
+	public void testPattern_test2()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("IIPIPICPIICICIIF");
+		Assert.assertEquals("(.{2})P",dna2rna.pattern().toString());
+	}
+	
+	/*
+	 * Test nat() method with a non-zero string.
+	 */
+	public void testNat_verify()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("CICCCP");
+		Assert.assertEquals(29, dna2rna.nat());
+	}
+
+	/*
+	 * Test nat() method with a string that just has "P" at the end.
+	 */
+	public void testNat_terminatorOnly()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("P");
+		Assert.assertEquals(0, dna2rna.nat());
+	}
+	
+	/*
+	 * Test nat() with DNA equal to the empty rope.
+	 */
+	public void testNat_empty()
+	{
+		dna2rna = new DnaToRna();
+		Assert.assertEquals(0, dna2rna.nat());
+	}
 }
