@@ -194,6 +194,8 @@ public class DnaToRna {
 	   *     to output the RNA).
 	   *      As we process, store the results of our processed DNA in one place (the template)
 	   *     and remove what we've processed from the DNA string.
+	   *     
+	   *     TODO: Add checks for the end of the DNA.
 	   */
 	  private Rope template()
 	  {
