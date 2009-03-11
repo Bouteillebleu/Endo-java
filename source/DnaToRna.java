@@ -137,9 +137,8 @@ public class DnaToRna {
 	              DNA = DNA.delete(0,2);
 	              int n = nat();
 	              if (finish) break;
-	              // Add "Skip the next n bases".
-	              // We can do this with the regex ".{n}".
-	              p = p.append(".{");
+	              // Add "Skip the next n bases" as "{n}".
+	              p = p.append("{");
 	              p = p.append(Integer.toString(n));
 	              p = p.append("}");
 	              break;	      
@@ -147,10 +146,10 @@ public class DnaToRna {
 	              DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
-	              // Add "Search for the sequence s".
-	              // We can do this with the regex ".*?" and then s.
-	              p = p.append(".*?");
+	              // Add "Search for the sequence s" as "[s]".
+	              p = p.append("[");
 	              p = p.append(s);
+	              p = p.append("]");
 	              break;
 	            case 'I':
 	              char charThird = DNA.charAt(2);
@@ -194,14 +193,17 @@ public class DnaToRna {
 	   *     to output the RNA).
 	   *      As we process, store the results of our processed DNA in one place (the template)
 	   *     and remove what we've processed from the DNA string.
-	   *     
-	   *     TODO: Add checks for the end of the DNA.
 	   */
 	  public Rope template()
 	  {
 	    Rope t = e;
-	    while(!finish)
+	    while(DNA.length() > 0 && !finish)
 	    {
+	      if (DNA.length() == 0)
+	      {
+	    	  finish = true;
+	    	  return e;
+	      }
 	      char charFirst = DNA.charAt(0);
 	      switch (charFirst)
 	      {

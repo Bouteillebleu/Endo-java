@@ -56,7 +56,7 @@ public class TestDnaToRna extends TestCase {
 	{
 		dna2rna = new DnaToRna();
 		dna2rna.setDNA("IIPIPICPIICICIIF");
-		Assert.assertEquals("(.{2})P",dna2rna.pattern().toString());
+		Assert.assertEquals("({2})P",dna2rna.pattern().toString());
 	}
 	
 	/*
