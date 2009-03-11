@@ -20,18 +20,6 @@ public class RnaToImage {
 	  protected int y;
 	  Posn(int x, int y) { this.x = x; this.y = y; }
   }
-  private class Pixel {
-	  protected RGB rgb;
-	  protected int transparency;
-	  Pixel(int R, int G, int B, int trans) {
-		  this.rgb = new RGB(R,G,B);
-		  this.transparency = trans;
-	  }
-	  Pixel() {
-		  this.rgb = new RGB(0,0,0);
-		  this.transparency = 0;
-	  }
-  }
   private class Bitmap {
 	  protected Pixel[][] at = new Pixel[600][600];
   }
@@ -47,17 +35,17 @@ public class RnaToImage {
    */
   private static RopeBuilder rb = new RopeBuilder();
   private static final Rope e = rb.build("");
-  private static Color black   = new Color(0  ,0  ,0  );
-  private static Color red     = new Color(255,0  ,0  );
-  private static Color green   = new Color(0  ,255,0  );
-  private static Color yellow  = new Color(255,255,0  );
-  private static Color blue    = new Color(0  ,0  ,255);
-  private static Color magenta = new Color(255,0  ,255);
-  private static Color cyan    = new Color(0  ,255,255);
-  private static Color white   = new Color(255,255,255);
+  public static Color black   = new Color(0  ,0  ,0  );
+  public static Color red     = new Color(255,0  ,0  );
+  public static Color green   = new Color(0  ,255,0  );
+  public static Color yellow  = new Color(255,255,0  );
+  public static Color blue    = new Color(0  ,0  ,255);
+  public static Color magenta = new Color(255,0  ,255);
+  public static Color cyan    = new Color(0  ,255,255);
+  public static Color white   = new Color(255,255,255);
   
-  private static Color transparent = new Color(0);
-  private static Color opaque      = new Color(255);
+  public static Color transparent = new Color(0);
+  public static Color opaque      = new Color(255);
   
   private Rope RNA = e;
   private ArrayList<Color> bucket = new ArrayList<Color>();
@@ -65,6 +53,14 @@ public class RnaToImage {
   private Posn mark = new Posn(0,0);
   private Direction dir = Direction.EAST;
   private ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+  
+  /*
+   * Constructor that takes no arguments. Used for testing.
+   */
+  public RnaToImage()
+  {
+	  return;
+  }
   
   public RnaToImage(String rnaFilename)
   {
@@ -141,19 +137,93 @@ public class RnaToImage {
 	  bucket.add(0,c);
   }
   
+  public Pixel currentPixel()
+  {
+	  int numColors = 0;
+	  int red = 0;
+	  int green = 0;
+	  int blue = 0;
+	  int alpha = 0;
+	  for (int i=0; i<bucket.size(); i++)
+	  {
+		  if (bucket.get(i).isColoured())
+		  {
+			  numColors++;
+			  red += bucket.get(i).rgb.R;
+			  green += bucket.get(i).rgb.G;
+			  blue += bucket.get(i).rgb.B;			  
+		  }
+		  else
+		  {
+			  alpha += bucket.get(i).transparency;
+		  }
+	  }
+	  if (numColors > 0)
+	  {
+		  red /= numColors;
+		  green /= numColors;
+		  blue /= numColors;
+	  }
+	  if (numColors < bucket.size())
+	  {
+		  alpha /= bucket.size() - numColors;
+	  }
+	  else
+	  {
+		  alpha = 255;
+	  }	  
+	  return new Pixel(red*alpha/255,
+			           green*alpha/255,
+			           blue*alpha/255,
+			           alpha);
+  }
+  
   public Posn move(Posn p, Direction d)
   {
-	  return new Posn(0,0);
+	  switch(d)
+	  {
+	    default: /* FALL THRU */
+	    case NORTH:
+	    	return new Posn( p.x       ,(p.y-1)%600);
+	    case EAST:
+	    	return new Posn((p.x+1)%600, p.y        );
+	    case SOUTH:
+	    	return new Posn( p.x       ,(p.y+1)%600);
+	    case WEST:
+	    	return new Posn((p.x-1)%600, p.y        );
+	  }
   }
   
   public Direction turnCounterClockwise(Direction d)
   {
-	  return Direction.NORTH;
+	  switch(d)
+	  {
+	    default: /* FALL THRU */
+	    case NORTH:
+	    	return Direction.WEST;
+	    case EAST:
+	    	return Direction.NORTH;
+	    case SOUTH:
+	    	return Direction.EAST;
+	    case WEST:
+	    	return Direction.SOUTH;
+	  }
   }
   
   public Direction turnClockwise(Direction d)
   {
-	  return Direction.NORTH;
+	  switch(d)
+	  {
+	    default: /* FALL THRU */
+	    case NORTH:
+	    	return Direction.EAST;
+	    case EAST:
+	    	return Direction.SOUTH;
+	    case SOUTH:
+	    	return Direction.WEST;
+	    case WEST:
+	    	return Direction.NORTH;
+	  }
   }
   
   public void line(Posn start, Posn end)
