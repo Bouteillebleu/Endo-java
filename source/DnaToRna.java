@@ -1,10 +1,14 @@
 package source;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 //import java.util.zip.ZipInputStream;
 
 import org.ahmadsoft.ropes.Rope;
@@ -640,7 +644,19 @@ public class DnaToRna {
 	  
 	  private void finish()
 	  {
-	    // Outputs RNA string.
+	    // Outputs RNA string to file endo.rna.
+		try {
+		  BufferedWriter buf = new BufferedWriter(new FileWriter("C:/Coding/Endo/endo.rna"));
+		  Iterator<Character> it = RNA.iterator();
+		  while (it.hasNext())
+		  {
+			buf.write(it.next());  
+		  }
+		  buf.flush();
+		  buf.close();
+		} catch (IOException e) {
+		  System.out.println("Problem writing to endo.rna.");
+		}
 	  }
 
 	
