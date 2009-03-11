@@ -60,6 +60,16 @@ public class TestDnaToRna extends TestCase {
 	}
 	
 	/*
+	 * Test template() method with a non-zero string.
+	 */
+	public void testTemplate_verify()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("CFPICIFCCPIICPPFIIPCICPICICIIC");
+		Assert.assertEquals("ICFP3_4FC|5|PP",dna2rna.template().toString());
+	}
+	
+	/*
 	 * Test nat() method with a non-zero string.
 	 */
 	public void testNat_verify()

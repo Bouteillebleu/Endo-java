@@ -197,7 +197,7 @@ public class DnaToRna {
 	   *     
 	   *     TODO: Add checks for the end of the DNA.
 	   */
-	  private Rope template()
+	  public Rope template()
 	  {
 	    Rope t = e;
 	    while(!finish)
