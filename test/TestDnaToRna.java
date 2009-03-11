@@ -1,5 +1,10 @@
 package test;
 
+import java.util.ArrayList;
+
+import org.ahmadsoft.ropes.Rope;
+import org.ahmadsoft.ropes.RopeBuilder;
+
 import source.DnaToRna;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -65,7 +70,7 @@ public class TestDnaToRna extends TestCase {
 	public void testTemplate_verify()
 	{
 		dna2rna = new DnaToRna();
-		dna2rna.setDNA("CFPICIFCCPIICPPFIIPCICPICICIIC");
+		dna2rna.setDNA("CFPICIFIICPCCPPFIIPCICPICICIIC");
 		Assert.assertEquals("ICFP<3_4>FC|5|PP",dna2rna.template().toString());
 	}
 	
@@ -106,5 +111,118 @@ public class TestDnaToRna extends TestCase {
 		dna2rna = new DnaToRna();
 		dna2rna.setDNA("CPICFPICFIF");
 		Assert.assertEquals("IFPCFPC",dna2rna.consts().toString());
+	}
+	
+	/*
+	 * Test asnat() with a positive number.
+	 */
+	public void testAsnat_verify()
+	{
+		dna2rna = new DnaToRna();
+		Assert.assertEquals("CIICCP",dna2rna.asnat(25).toString());
+	}
+	
+	/*
+	 * Test asnat() with 0.
+	 */
+	public void testAsnat_zero()
+	{
+		dna2rna = new DnaToRna();
+		Assert.assertEquals("P",dna2rna.asnat(0).toString());
+	}
+
+	/*
+	 * Test quote() with a non-empty string.
+	 */
+	public void testQuote_verify()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("ICFPCFPI");
+		Assert.assertEquals("CFPICFPICC",dna2rna.quote(dna2rna.getDNA()).toString());
+	}
+	
+	/*
+	 * Test quote() with an empty string.
+	 */
+	public void testQuote_empty()
+	{
+		dna2rna = new DnaToRna();
+		Assert.assertEquals("",dna2rna.quote(DnaToRna.e).toString());
+	}
+	
+	/*
+	 * Test protect() with a non-empty string and non-zero level.
+	 */
+	public void testProtect_verify()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("ICFPCFPI");
+		Assert.assertEquals("FPICCFPICCFF",dna2rna.protect(2,dna2rna.getDNA()).toString());
+	}
+
+	/*
+	 * Test protect() with a non-empty string and zero level.
+	 */
+	public void testProtect_zeroLevel()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("ICFPCFPI");
+		Assert.assertEquals("ICFPCFPI",dna2rna.protect(0,dna2rna.getDNA()).toString());
+	}
+
+	/*
+	 * Tests replace() using the data from full iteration test 1 in figure 16.
+	 */
+	public void testReplace_test1()
+	{
+		dna2rna = new DnaToRna();
+		RopeBuilder rob = new RopeBuilder();
+		Rope t = rob.build("PI<0_0>");
+		ArrayList<Rope> e = new ArrayList<Rope>();
+		e.add(rob.build("CF"));
+		dna2rna.setDNA("C");
+		dna2rna.replace(t,e);
+		Assert.assertEquals("PICFC",dna2rna.getDNA().toString());
+	}
+	
+	/*
+	 * Full iteration test 1 from Figure 16 of spec.
+	 */
+	public void testFullIteration_test1()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("IIPIPICPIICICIIFICCIFPPIICCFPC");
+	    Rope p = dna2rna.pattern();
+	    Assert.assertEquals("({2})P",p.toString());
+	    Rope t = dna2rna.template();
+	    Assert.assertEquals("PI<0_0>",t.toString());
+	    dna2rna.matchreplace(p,t);
+	    Assert.assertEquals("PICFC",dna2rna.getDNA().toString());
+	}
+
+	/*
+	 * Full iteration test 2 from Figure 16 of spec.
+	 */
+	public void testFullIteration_test2()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("IIPIPICPIICICIIFICCIFCCCPPIICCFPC");
+	    Rope p = dna2rna.pattern();
+	    Rope t = dna2rna.template();
+	    dna2rna.matchreplace(p,t);
+	    Assert.assertEquals("PIICCFCFFPC",dna2rna.getDNA().toString());
+	}
+
+	/*
+	 * Full iteration test 1 from Figure 16 of spec.
+	 */
+	public void testFullIteration_test3()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("IIPIPIICPIICIICCIICFCFC");
+	    Rope p = dna2rna.pattern();
+	    Rope t = dna2rna.template();
+	    dna2rna.matchreplace(p,t);
+	    Assert.assertEquals("I",dna2rna.getDNA().toString());
 	}
 }

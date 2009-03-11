@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.zip.ZipInputStream;
+//import java.util.zip.ZipInputStream;
 
 import org.ahmadsoft.ropes.Rope;
 import org.ahmadsoft.ropes.RopeBuilder;
@@ -232,9 +232,9 @@ public class DnaToRna {
 	              int n = nat();
 	              if (finish) break;
 	              t = t.append("<");
-	              t = t.append(Integer.toString(l));
-	              t = t.append("_");
 	              t = t.append(Integer.toString(n));
+	              t = t.append("_");
+	              t = t.append(Integer.toString(l));
 	              t = t.append(">");
 	              break;
 	            case 'I':
@@ -286,7 +286,7 @@ public class DnaToRna {
 	   *     processed from the DNA string, and replace the environments with the templates using
 	   *     replace().
 	   */
-	  private void matchreplace(Rope pat, Rope t)
+	  public void matchreplace(Rope pat, Rope t)
 	  {
 		  int index = 0;
 		  ArrayList<Rope> environment = new ArrayList<Rope>();
@@ -375,9 +375,70 @@ public class DnaToRna {
 	   *      Once we have got through the supplied template, prepend the DNA to be added to the
 	   *     existing DNA string.
 	   */
-	  private void replace(Rope t,ArrayList<Rope> e)
+	  public void replace(Rope t,ArrayList<Rope> environment)
 	  {
-		  
+		  Rope r = e; 
+		  while (t.length() > 0)
+		  {
+			  char currentChar = t.charAt(0);
+			  switch(currentChar)
+			  {
+			  	case 'I': /* FALL THRU */
+			  	case 'C': /* FALL THRU */
+			  	case 'F': /* FALL THRU */
+			  	case 'P':
+			  		t = t.delete(0,1);  
+			  		r = r.append(currentChar);
+			  		break;
+			  	case '<':
+			  		t = t.delete(0,1); // gets rid of the '<'.
+			    	char nextChar = t.charAt(0);
+			    	int n = 0;
+			    	while (nextChar!='_') {
+			    	  n = (n*10) + Character.digit(nextChar,10);
+			    	  t = t.delete(0,1);
+			    	  nextChar = t.charAt(0);
+			    	}
+			    	t = t.delete(0,1); // gets rid of the '_'.
+			    	nextChar = t.charAt(0);
+			    	int l = 0;
+			    	while (nextChar!='>') {
+			    	  l = (l*10) + Character.digit(nextChar,10);
+			    	  t = t.delete(0,1);
+			    	  nextChar = t.charAt(0);
+			    	}
+			    	t = t.delete(0,1); // gets rid of the '>'.
+			    	if (n < environment.size())
+			    	{
+				    	r = r.append(protect(l,environment.get(n)));			    		
+			    	}
+			    	else
+			    	{
+			    		r = r.append(protect(l,e));
+			    	}
+			    	break;
+			  	case '|':
+			  		t = t.delete(0,1); // gets rid of the initial '|'.
+			    	nextChar = t.charAt(0);
+			    	n = 0;
+			    	while (nextChar!='|') {
+			    	  n = (n*10) + Character.digit(nextChar,10);
+			    	  t = t.delete(0,1);
+			    	  nextChar = t.charAt(0);
+			    	}
+			    	t = t.delete(0,1); // gets rid of the final '|'.
+			    	if (n < environment.size())
+			    	{
+			    		r = r.append(asnat(environment.get(n).length()));
+			    	}
+			    	else
+			    	{
+			    		r = r.append(asnat(0));
+			    	}
+			    	break;
+			  }
+		  }
+		  DNA = r.append(DNA);
 	  }
 	  
 	  /*
@@ -449,12 +510,16 @@ public class DnaToRna {
 	   *      Numbers are in binary with most significant bit last, and terminated with P.
 	   *     So, for example, decimal 10 (binary 1010) would be stored as ICICP, and decimal 25
 	   *     (binary 11001) would be stored as CIICCP.
-	   *     
-	   *      TODO: As with nat(), figure out a non-recursive way of doing this.
 	   */
-	  private Rope asnat(int n)
+	  public Rope asnat(int n)
 	  {
-		  return e;
+		  Rope number = e;
+		  for (; n >0; n/=2)
+		  {
+			 number = number.append(n % 2 == 0 ? "I" : "C");
+		  }
+		  number = number.append("P");
+		  return number;
 	  }
 	  
 	  /*
@@ -531,12 +596,16 @@ public class DnaToRna {
 
 	  /*
 	   * - protect(l,d) : [Repeatedly encodes a sequence of bases using quote()]
-	   *     Call the quote() method on d repeatedly until it's been done l times. (This is in the 
-	   *     spec as recursive, but can easily be made iterative.)
+	   *     Call the quote() method on d repeatedly until it's been done l times.
 	   */
-	  private void protect(int l, Rope d)
+	  public Rope protect(int l, Rope d)
 	  {
-		  
+		  Rope prot = d;
+		  for(int i=0; i<l; i++)
+		  {
+			  prot = quote(prot);
+		  }
+		  return prot;
 	  }
 	  
 	  /*
@@ -544,9 +613,29 @@ public class DnaToRna {
 	   *     Go through all the bases in a DNA string, turning them into their "quoted" forms. (As
 	   *     for protect(), this is in the spec as recursive but can easily be made iterative.)
 	   */
-	  private Rope quote(Rope d)
+	  public Rope quote(Rope d)
 	  {
-		  return e;
+		  Rope quoted = e;
+		  for (int i=0; i< d.length(); i++)
+		  {
+			  char currentChar = d.charAt(i);
+			  switch(currentChar)
+			  {
+			  	case 'I':
+			  	  quoted = quoted.append("C");
+			  	  break;
+			  	case 'C':
+			  	  quoted = quoted.append("F");
+			  	  break;
+			  	case 'F':
+			  	  quoted = quoted.append("P");
+			  	  break;
+			  	case 'P':
+			  	  quoted = quoted.append("IC");
+			  	  break;
+			  }
+		  }
+		  return quoted;
 	  }
 	  
 	  private void finish()
