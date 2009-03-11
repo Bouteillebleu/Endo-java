@@ -226,28 +226,29 @@ public class DnaToRna {
 	            case 'F': /* FALL THRU */
 	            case 'P':
 	              DNA = DNA.delete(0,2);
+	              int l = nat();
+	              if (finish) break;
 	              int n = nat();
 	              if (finish) break;
-	              // Add "Skip the next n bases".
-	              // We can do this with the regex ".{n}".
-	              p = p.append(".{");
-	              p = p.append(Integer.toString(n));
-	              p = p.append("}");
+	              t = t.append(Integer.toString(l));
+	              t = t.append("_");
+	              t = t.append(Integer.toString(n));
 	              break;
 	            case 'I':
 	              char charThird = DNA.charAt(2);
 	              switch (charThird)
 	              {
-	                case 'P':
-	                  DNA = DNA.delete(0,3);
-	                  level++;
-	                  p = p.append("(");
-	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
 	                  DNA = DNA.delete(0,3);
-	                  if (level == 0) return p;
-	                  else { level--; p = p.append(")"); }
+	                  return t;
+	                case 'P':
+	                  DNA = DNA.delete(0,3);
+		              int m = nat();
+		              if (finish) break;
+	                  t = t.append("|");
+		              t = t.append(Integer.toString(m));
+	                  t = t.append("|");
 	                  break;
 	                case 'I':
 	                  RNA = RNA.append(DNA.subSequence(3,9));
