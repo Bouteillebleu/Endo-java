@@ -87,4 +87,14 @@ public class TestDnaToRna extends TestCase {
 		dna2rna = new DnaToRna();
 		Assert.assertEquals(0, dna2rna.nat());
 	}
+	
+	/*
+	 * Test consts() method with a non-zero string.
+	 */
+	public void testConsts_verify()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("CPICFPICFIF");
+		Assert.assertEquals("IFPCFPC",dna2rna.consts().toString());
+	}
 }

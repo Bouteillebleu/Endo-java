@@ -197,6 +197,74 @@ public class DnaToRna {
 	   */
 	  private Rope template()
 	  {
+	    Rope t = e;
+	    while(!finish)
+	    {
+	      char charFirst = DNA.charAt(0);
+	      switch (charFirst)
+	      {
+	        case 'C':
+	          DNA = DNA.delete(0,1);
+	          t = t.append("I");
+	          break;	  
+	        case 'F':
+	          DNA = DNA.delete(0,1);
+	          t = t.append("C");
+	          break;
+	        case 'P':
+	          DNA = DNA.delete(0,1);
+	          t = t.append("F");
+	          break;
+	        case 'I':
+	          char charSecond = DNA.charAt(1);
+	          switch (charSecond)
+	          {
+	            case 'C':
+	              DNA = DNA.delete(0,2);
+	              t = t.append("P");
+	              break;
+	            case 'F': /* FALL THRU */
+	            case 'P':
+	              DNA = DNA.delete(0,2);
+	              int n = nat();
+	              if (finish) break;
+	              // Add "Skip the next n bases".
+	              // We can do this with the regex ".{n}".
+	              p = p.append(".{");
+	              p = p.append(Integer.toString(n));
+	              p = p.append("}");
+	              break;
+	            case 'I':
+	              char charThird = DNA.charAt(2);
+	              switch (charThird)
+	              {
+	                case 'P':
+	                  DNA = DNA.delete(0,3);
+	                  level++;
+	                  p = p.append("(");
+	                  break;
+	                case 'C': /* FALL THRU */
+	                case 'F':
+	                  DNA = DNA.delete(0,3);
+	                  if (level == 0) return p;
+	                  else { level--; p = p.append(")"); }
+	                  break;
+	                case 'I':
+	                  RNA = RNA.append(DNA.subSequence(3,9));
+	                  DNA = DNA.delete(0,10);
+	                  break;
+	                default:
+	                  finish = true;
+	              }
+	              break;
+	            default:
+	              finish = true;
+	          }
+	          break;
+	        default:
+	          finish = true;
+	      }
+	    }
 	    return e;
 	  }
 
@@ -317,36 +385,70 @@ public class DnaToRna {
 	   *     (return to whatever called this method).
 	   *      As with pattern() and nat(), as we process, store the results of our processed DNA
 	   *     in one place (the decoded DNA) and remove what we've processed from the DNA string.
-	   *      TODO: As with nat(), figure out how to store the decoded DNA in a way that doesn't
-	   *     involve recursive calls to the same method.
 	   */
-	  private Rope consts()
+	  public Rope consts()
 	  {
-	    char charFirst = DNA.charAt(0);
-	    switch (charFirst)
-	    {
-	      case 'C':
-	        DNA = DNA.delete(0,0);
-	        return consts().insert(0,"I");
-	      case 'F':
-	        DNA = DNA.delete(0,0);
-	        return consts().insert(0,"C");
-	      case 'P':
-	        DNA = DNA.delete(0,0);
-	        return consts().insert(0,"F");
-	      case 'I':
-	        char charSecond = DNA.charAt(1);
-	        switch (charSecond)
-	        {
-	          case 'C':
-	            DNA = DNA.delete(0,1);
-	            return consts().insert(0,"P");
-	          default:
-	            return e;
-	        }
-	      default:
-	        return e;
-	    }
+		Rope decoded = e;
+		while(DNA.length()>0)
+		{
+			switch (DNA.charAt(0))
+			{
+			  case 'C':
+				DNA = DNA.delete(0,1);
+				decoded = decoded.append("I");
+				break;
+			  case 'F':
+				DNA = DNA.delete(0,1);
+				decoded = decoded.append("C");
+				break;
+			  case 'P':
+				DNA = DNA.delete(0,1);
+				decoded = decoded.append("F");
+				break;
+			  case 'I':
+				if (DNA.charAt(1) == 'C')
+				{
+					DNA = DNA.delete(0,2);
+					decoded = decoded.append("P");
+				}
+				else
+				{
+					return decoded;
+				}
+			}
+		}
+		finish = true;
+		return decoded;
+
+		/*
+		 * Recursive version as in the spec:
+		 * 
+	     * char charFirst = DNA.charAt(0);
+	     * switch (charFirst)
+	     * {
+	     *   case 'C':
+	     *     DNA = DNA.delete(0,0);
+	     *     return consts().append("I");
+	     *   case 'F':
+	     *     DNA = DNA.delete(0,0);
+	     *     return consts().append("C");
+	     *   case 'P':
+	     *     DNA = DNA.delete(0,0);
+	     *     return consts().append("F");
+	     *   case 'I':
+	     *     char charSecond = DNA.charAt(1);
+	     *     switch (charSecond)
+	     *     {
+	     *       case 'C':
+	     *         DNA = DNA.delete(0,1);
+	     *         return consts().append("P");
+	     *       default:
+	     *         return e;
+	     *     }
+	     *   default:
+	     *     return e;
+	     * }
+	     */
 	  }
 
 	  /*
