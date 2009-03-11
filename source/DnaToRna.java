@@ -356,7 +356,7 @@ public class DnaToRna {
 			    case ')':
 			    	// Deal with closing group.
 			    	pat = pat.delete(0,1); // gets rid of the ')'.
-			    	environment.add(DNA.subSequence(openItems.get(0),index-1));
+			    	environment.add(DNA.subSequence(openItems.get(0),index));
 			    	openItems.remove(0);
 			    	break;
 			  }
