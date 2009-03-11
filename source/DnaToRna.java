@@ -94,11 +94,8 @@ public class DnaToRna {
 	   *      As we process, store the results of our processed DNA in one place (the pattern)
 	   *     and remove what we've processed from the DNA string.
 	   *     
-	   *     TODO: Decide between using regex notation or custom notation; if custom, document.
-	   *     
-	   *     CHOSEN: Go for regex notation at the moment. If it turns out to be unsustainable,
-	   *     reconsider and replan; for now, we'll just match it with the built in Ropes regex
-	   *     matcher in matchreplace().
+	   *     Uses custom notation for skip and search, as naive regex matching won't work
+	   *     for matchreplace(), so there's no advantage to standard regex notation.
 	   *     
 	   *     GOTCHA: Ropes.delete(start,end) deletes from position start
 	   *     to position end-1 (thus delete(0,0) does nothing and causes
@@ -234,9 +231,11 @@ public class DnaToRna {
 	              if (finish) break;
 	              int n = nat();
 	              if (finish) break;
+	              t = t.append("<");
 	              t = t.append(Integer.toString(l));
 	              t = t.append("_");
 	              t = t.append(Integer.toString(n));
+	              t = t.append(">");
 	              break;
 	            case 'I':
 	              char charThird = DNA.charAt(2);
@@ -289,7 +288,81 @@ public class DnaToRna {
 	   */
 	  private void matchreplace(Rope pat, Rope t)
 	  {
-
+		  int index = 0;
+		  ArrayList<Rope> environment = new ArrayList<Rope>();
+		  ArrayList<Integer> openItems = new ArrayList<Integer>();
+		  while (pat.length() > 0)
+		  {
+			  char currentChar = pat.charAt(0);
+			  switch(currentChar)
+			  {
+			    case 'I': /* FALL THRU */
+			    case 'C': /* FALL THRU */
+			    case 'F': /* FALL THRU */
+			    case 'P':
+			    	pat = pat.delete(0,1);
+			    	if (DNA.charAt(index) == currentChar)
+			    	{
+			    		index++;
+			    	}
+			    	else
+			    	{
+			    		return;
+			    	}
+			    	break;
+			    case '{':
+			    	// Deal with skip case.
+			    	pat = pat.delete(0,1); // gets rid of the '{'.
+			    	char nextChar = pat.charAt(0);
+			    	int n = 0;
+			    	while (nextChar!='}') {
+			    	  n = (n*10) + Character.digit(nextChar,10);
+			    	  pat = pat.delete(0,1);
+			    	  nextChar = pat.charAt(0);
+			    	}
+			    	pat = pat.delete(0,1); // gets rid of the '}'.
+			    	index += n;
+			    	if (index > DNA.length())
+			    	{
+			    		return;
+			    	}
+			    	break;
+			    case '[':
+			    	// Deal with search case.
+			    	StringBuilder s = new StringBuilder();
+			    	pat = pat.delete(0,1); // gets rid of the '['.
+			    	nextChar = pat.charAt(0);
+			    	while (nextChar!=']') {
+			    	  s.append(nextChar);
+			    	  pat = pat.delete(0,1);
+			    	  nextChar = pat.charAt(0);
+			    	}
+			    	pat = pat.delete(0,1); // gets rid of the ']'.
+			    	int firstMatch = DNA.indexOf(s.toString(),index);
+			    	if (firstMatch > index) // This covers case where firstMatch is -1, i.e. no match
+			    	{
+			    		index = firstMatch;
+			    	}
+			    	else
+			    	{
+			    		return;
+			    	}
+			    	break;
+			    case '(':
+			    	// Deal with opening group.
+			    	pat = pat.delete(0,1); // gets rid of the '('.
+			    	openItems.add(0,index);
+			    	break;
+			    case ')':
+			    	// Deal with closing group.
+			    	pat = pat.delete(0,1); // gets rid of the ')'.
+			    	environment.add(DNA.subSequence(openItems.get(0),index-1));
+			    	openItems.remove(0);
+			    	break;
+			  }
+		  }
+		DNA = DNA.delete(0,index);
+		replace(t,environment);
 	  }
 	  
 	  /*

@@ -66,7 +66,7 @@ public class TestDnaToRna extends TestCase {
 	{
 		dna2rna = new DnaToRna();
 		dna2rna.setDNA("CFPICIFCCPIICPPFIIPCICPICICIIC");
-		Assert.assertEquals("ICFP3_4FC|5|PP",dna2rna.template().toString());
+		Assert.assertEquals("ICFP<3_4>FC|5|PP",dna2rna.template().toString());
 	}
 	
 	/*
