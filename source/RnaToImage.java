@@ -19,16 +19,12 @@ public class RnaToImage {
   /*
    * Inner classes.
    */
-  private class Posn {
-	  protected int x;
-	  protected int y;
+  public class Posn {
+	  public int x;
+	  public int y;
 	  Posn(int x, int y) { this.x = x; this.y = y; }
   }
-  private class Bitmap {
-	  // First index is x, second is y.
-	  protected Pixel[][] at = new Pixel[600][600];
-  }
-  private enum Direction {
+  public enum Direction {
 	  NORTH,
 	  EAST,
 	  SOUTH,
@@ -39,7 +35,7 @@ public class RnaToImage {
    * Class-global variables.
    */
   private static RopeBuilder rb = new RopeBuilder();
-  private static final Rope e = rb.build("");
+  public static final Rope e = rb.build("");
   public static Color black   = new Color(0  ,0  ,0  );
   public static Color red     = new Color(255,0  ,0  );
   public static Color green   = new Color(0  ,255,0  );
@@ -75,7 +71,19 @@ public class RnaToImage {
    */
   public RnaToImage()
   {
-	  return;
+	bitmaps.add(new Bitmap());
+  }
+  
+  /*
+   * Constructor that takes one argument, which is an RNA string.
+   * Used for testing.
+   */
+  public RnaToImage(String rnaInput)
+  {
+	  bitmaps.add(new Bitmap());
+	  this.RNA = rb.build(rnaInput);
+      this.rnaOutputFilename = "D:/Coding/Endo/endo.png";
+
   }
   
   public RnaToImage(String rnaInputFilename, String rnaOutputFilename)
@@ -96,12 +104,52 @@ public class RnaToImage {
 	}  
   }
   
+	/*
+	 * Get the current contents of RNA. Used for testing.
+	 */
+	public Rope getRNA()
+	{
+		return RNA;
+	}
+
+	/*
+	 * Set RNA to a different value. Used for testing (so as to not rely on file reading).
+	 */
+	public void setRNA(String newRNA)
+	{
+		this.RNA = rb.build(newRNA);
+	}
+
+	/*
+	 * Get the current contents of position. Used for testing.
+	 */
+	public Posn getPosition()
+	{
+		return this.position;
+	}
+	
+	/*
+	 * Sets position. Used for testing.
+	 */
+	public void setPosition(Posn p)
+	{
+		this.position = p;
+	}
+	
+	/*
+	 * Gets the list of bitmaps. Used for testing.
+	 */
+	public ArrayList<Bitmap> getBitmaps()
+	{
+		return this.bitmaps;
+	}
+	
   public void build()
   {
 	while (RNA.length() >= 7)
 	{
 		String currentBase = RNA.subSequence(0,7).toString();
-		RNA.delete(0,7);
+		RNA = RNA.delete(0,7);
 		if (currentBase.equals("PIPIIIC")) {
 			addColor(black);
 		} else if (currentBase.equals("PIPIIIP")) {
@@ -201,13 +249,13 @@ public class RnaToImage {
 	  {
 	    default: /* FALL THRU */
 	    case NORTH:
-	    	return new Posn( p.x       ,(p.y-1)%600);
+	    	return new Posn( p.x         ,(p.y+599)%600);
 	    case EAST:
-	    	return new Posn((p.x+1)%600, p.y        );
+	    	return new Posn((p.x+1)%600  , p.y         );
 	    case SOUTH:
-	    	return new Posn( p.x       ,(p.y+1)%600);
+	    	return new Posn( p.x         ,(p.y+1)%600  );
 	    case WEST:
-	    	return new Posn((p.x-1)%600, p.y        );
+	    	return new Posn((p.x+599)%600, p.y         );
 	  }
   }
   
@@ -365,17 +413,18 @@ public class RnaToImage {
   
   public void draw()
   {
-	  BufferedImage output = new BufferedImage(600,600,BufferedImage.TYPE_INT_ARGB);
+	  // http://www.cap-lore.com/code/java/JavaPixels.html was some help here.
+	  BufferedImage output = new BufferedImage(600,600,BufferedImage.TYPE_INT_RGB);
 	  Bitmap b = bitmaps.get(0);
+	  // Ignore transparency on the bitmap for this.
 	  for (int x=0; x<600; x++)
 	  {
 		  for (int y=0; y<600; y++)
 		  {
-			int argb = ((b.at[x][y].alpha) >> 24)
-			         + ((b.at[x][y].rgb.R) >> 16)
+			int rgb = ((b.at[x][y].rgb.R) >> 16)
 			         + ((b.at[x][y].rgb.G) >>  8)
 			         + ((b.at[x][y].rgb.B));
-			output.setRGB(x,y,argb);
+			output.setRGB(x,y,rgb);
 		  }
 	  }
 	  try {

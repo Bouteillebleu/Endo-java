@@ -11,4 +11,11 @@ public class Pixel {
 	  this.rgb = new RGB(0,0,0);
 	  this.alpha = 0;
 	}
+	
+	public String toString() {
+		return this.rgb.R+","
+		      +this.rgb.G+","
+		      +this.rgb.B+","
+		      +this.alpha;
+	}
 }

@@ -2,6 +2,7 @@ package test;
 
 import source.Pixel;
 import source.RnaToImage;
+import source.RnaToImage.Posn;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -10,21 +11,98 @@ public class TestRnaToImage extends TestCase {
 	RnaToImage rna2image;
 
 	/*
-	 * Test method for 'source.RnaToImage.RnaToImage(String)'
+	 * Test that the RnaToImage constructor can read in a file 
+	 * and sets the RNA string as a result.
+	 * TODO: Find a way to specify filenames without absolute paths.
 	 */
-	public void testRnaToImage()
-	{
-
+	public void testRnaToImage_verify() {
+		rna2image = new RnaToImage("D:/Coding/Endo/resources/endo.rna","");
+		Assert.assertFalse(rna2image.getRNA().equals(RnaToImage.e));
+	}
+	
+	//PIPIIPCPFFFFFP
+	/*
+	 * Test that the RnaToImage constructor can read in a file and set
+	 * the RNA string correctly.
+	 */
+	public void testRnaToImage_verifyContents() {
+		rna2image = new RnaToImage("D:/Coding/Endo/resources/short.rna","");
+		Assert.assertEquals("PIPIIPCPFFFFFP",rna2image.getRNA().toString());
 	}
 
 	/*
-	 * Test method for 'source.RnaToImage.addColor(Color)'
+	 * Test that move() changes the value of position
+	 * when not moving off the edge of the bitmap.
 	 */
-	public void testAddColor()
+	public void testMove_verify()
 	{
-
+		rna2image = new RnaToImage();
+		Posn p = rna2image.getPosition();
+		// Move east.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.EAST));
+		p = rna2image.getPosition();
+		Assert.assertEquals(1,p.x);
+		Assert.assertEquals(0,p.y);
+		// Move south.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.SOUTH));
+		p = rna2image.getPosition();
+		Assert.assertEquals(1,p.x);
+		Assert.assertEquals(1,p.y);
+		// Move west.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.WEST));
+		p = rna2image.getPosition();
+		Assert.assertEquals(0,p.x);
+		Assert.assertEquals(1,p.y);
+		// Move north.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.NORTH));
+		p = rna2image.getPosition();
+		Assert.assertEquals(0,p.x);
+		Assert.assertEquals(0,p.y);
+	}
+	
+	/*
+	 * Test that move() changes the value of position
+	 * when moves off the edge of the bitmap are involved.
+	 */
+	public void testMove_verify_edgeMoves()
+	{
+		rna2image = new RnaToImage();
+		Posn p = rna2image.getPosition();
+		// Move west.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.WEST));
+		p = rna2image.getPosition();
+		Assert.assertEquals(599,p.x);
+		Assert.assertEquals(0,p.y);
+		// Move north.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.NORTH));
+		p = rna2image.getPosition();
+		Assert.assertEquals(599,p.x);
+		Assert.assertEquals(599,p.y);
+		// Move east.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.EAST));
+		p = rna2image.getPosition();
+		Assert.assertEquals(p.x,0);
+		Assert.assertEquals(p.y,599);
+		// Move south.
+		rna2image.setPosition(rna2image.move(p,RnaToImage.Direction.SOUTH));
+		p = rna2image.getPosition();
+		Assert.assertEquals(p.x,0);
+		Assert.assertEquals(p.y,0);
 	}
 
+
+	/*
+	 * Attempts to flood-fill the image red.
+	 * Assert won't test this - need to look.
+	 */
+	public void testRedFill()
+	{
+		rna2image = new RnaToImage("PIPIIIPPIIPIIP");
+		rna2image.build();
+		Pixel p = rna2image.getBitmaps().get(0).at[0][0];
+		Assert.assertEquals(rna2image.currentPixel().toString(),p.toString());
+	}
+	
 	/*
 	 * First test from Figure 21 of the spec.
 	 */
