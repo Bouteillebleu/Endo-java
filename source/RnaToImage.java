@@ -72,6 +72,7 @@ public class RnaToImage {
   public RnaToImage()
   {
 	bitmaps.add(new Bitmap());
+    this.rnaOutputFilename = "C:/Coding/Endo/endo.png";
   }
   
   /*
@@ -82,8 +83,7 @@ public class RnaToImage {
   {
 	  bitmaps.add(new Bitmap());
 	  this.RNA = rb.build(rnaInput);
-      this.rnaOutputFilename = "D:/Coding/Endo/endo.png";
-
+      this.rnaOutputFilename = "C:/Coding/Endo/endo.png";
   }
   
   public RnaToImage(String rnaInputFilename, String rnaOutputFilename)
@@ -144,7 +144,15 @@ public class RnaToImage {
 		return this.bitmaps;
 	}
 	
-  public void build()
+	/*
+	 * Sets an individual bitmap in Bitmaps. Used for testing.
+	 */
+	public void setBitmap(Bitmap b, int index)
+	{
+		this.bitmaps.set(index,b);
+	}
+	
+  public boolean build()
   {
 	while (RNA.length() >= 7)
 	{
@@ -194,7 +202,8 @@ public class RnaToImage {
 			// Do nothing.
 		}
 	}
-	draw();
+	boolean drawn = draw();
+	return drawn;
   }
   
   public void addColor(Color c)
@@ -411,29 +420,44 @@ public class RnaToImage {
 	  }	  
   }
   
-  public void draw()
+  public boolean draw()
   {
-	  // http://www.cap-lore.com/code/java/JavaPixels.html was some help here.
-	  BufferedImage output = new BufferedImage(600,600,BufferedImage.TYPE_INT_RGB);
+	  int[] data = flattenImage();
+	  boolean imageDrawn = writeToFile(data);
+	  return imageDrawn;	  
+  }
+  
+  public int[] flattenImage()
+  {
 	  Bitmap b = bitmaps.get(0);
+	  int[] rgbData = new int[600*600];
 	  // Ignore transparency on the bitmap for this.
-	  for (int x=0; x<600; x++)
+	  int i = 0;
+	  for (int y=0; y<600; y++)
 	  {
-		  for (int y=0; y<600; y++)
+		  for (int x=0; x<600; x++)
 		  {
-			int rgb = ((b.at[x][y].rgb.R) >> 16)
-			         + ((b.at[x][y].rgb.G) >>  8)
-			         + ((b.at[x][y].rgb.B));
-			output.setRGB(x,y,rgb);
+			  rgbData[i++] = ((b.at[x][y].rgb.R) >> 16)
+			          | ((b.at[x][y].rgb.G) >>  8)
+			          | ((b.at[x][y].rgb.B));
 		  }
 	  }
-	  try {
-		  ImageIO.write(output,"png",new File(this.rnaOutputFilename));
-		  System.out.printf("Image written to %s.\n",rnaOutputFilename);
-	  } catch (IOException e) {
-		  System.out.printf("Problem writing to %s.\n",rnaOutputFilename);
-	  }
-	  
+	  return rgbData;
+  }
+  
+  public boolean writeToFile(int[] data)
+  {
+	BufferedImage output = new BufferedImage(600,600,BufferedImage.TYPE_INT_RGB);
+	boolean imageDrawn = false;
+	output.setRGB(0,0,600,600,data,0,600);
+	try {
+	  File f = new File(this.rnaOutputFilename);
+	  imageDrawn = ImageIO.write(output,"png",f);
+	  System.out.printf("Image written to %s.\n",rnaOutputFilename);
+	} catch (IOException e) {
+	  System.out.printf("Problem writing to %s.\n",rnaOutputFilename);
+	}
+	return imageDrawn;
   }
 	
 }

@@ -1,5 +1,6 @@
 package test;
 
+import source.Bitmap;
 import source.Pixel;
 import source.RnaToImage;
 import source.RnaToImage.Posn;
@@ -98,9 +99,33 @@ public class TestRnaToImage extends TestCase {
 	public void testRedFill()
 	{
 		rna2image = new RnaToImage("PIPIIIPPIIPIIP");
-		rna2image.build();
+		Assert.assertTrue(rna2image.build());
 		Pixel p = rna2image.getBitmaps().get(0).at[0][0];
 		Assert.assertEquals(rna2image.currentPixel().toString(),p.toString());
+	}
+	
+	/*
+	 * Make all the pixels red, then check what the output data are.
+	 * Manually sets the bitmaps because build() automatically calls draw(),
+	 * which we only want part of for this test.
+	 */
+	public void testRedFill_noRender()
+	{
+		rna2image = new RnaToImage();
+		Bitmap b = rna2image.getBitmaps().get(0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				b.at[x][y]= new Pixel(255,0,0,255);
+			}
+		}
+		rna2image.setBitmap(b,0);
+		int[] rgbData = rna2image.flattenImage();
+		for(int i=0; i<600*600; i++)
+		{
+			Assert.assertEquals(0x00ff0000,rgbData[i]);			
+		}
 	}
 	
 	/*
@@ -174,6 +199,21 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(25,pix.rgb.G);
 		Assert.assertEquals(125,pix.rgb.B);
 		Assert.assertEquals(191,pix.alpha);
-
+	}
+	
+	/*
+	 * Test that writing to file with the data we expect produces
+	 * what we expect - here we want to produce a fully green image.
+	 */
+	public void testWriteToFile()
+	{
+		int[] data = new int[600*600];
+		for (int i=0; i<600*600; i++)
+		{
+			data[i] = 0x00ff00;
+		}
+		rna2image = new RnaToImage();
+		rna2image.writeToFile(data);
+		
 	}
 }
