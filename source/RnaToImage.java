@@ -437,8 +437,8 @@ public class RnaToImage {
 	  {
 		  for (int x=0; x<600; x++)
 		  {
-			  rgbData[i++] = ((b.at[x][y].rgb.R) >> 16)
-			          | ((b.at[x][y].rgb.G) >>  8)
+			  rgbData[i++] = ((b.at[x][y].rgb.R) << 16)
+			          | ((b.at[x][y].rgb.G) << 8)
 			          | ((b.at[x][y].rgb.B));
 		  }
 	  }
