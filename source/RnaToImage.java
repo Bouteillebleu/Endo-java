@@ -97,6 +97,7 @@ public class RnaToImage {
 		{
 		  buildingRNA.append((char)in.read());
 		}
+		in.close();
 		this.RNA = rb.build(buildingRNA.toString());
 	} catch (IOException e) {
 	    System.out.println("Problem with reading from Endo's RNA file.");
