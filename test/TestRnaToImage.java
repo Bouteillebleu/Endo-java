@@ -38,7 +38,7 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(0,pix.rgb.R);
 		Assert.assertEquals(0,pix.rgb.G);
 		Assert.assertEquals(0,pix.rgb.B);
-		Assert.assertEquals(170,pix.transparency);
+		Assert.assertEquals(170,pix.alpha);
 	}
 	
 	/*
@@ -54,7 +54,7 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(85,pix.rgb.R);
 		Assert.assertEquals(170,pix.rgb.G);
 		Assert.assertEquals(85,pix.rgb.B);
-		Assert.assertEquals(255,pix.transparency);
+		Assert.assertEquals(255,pix.alpha);
 	}
 	
 	/*
@@ -70,7 +70,7 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(127,pix.rgb.R);
 		Assert.assertEquals(127,pix.rgb.G);
 		Assert.assertEquals(0,pix.rgb.B);
-		Assert.assertEquals(127,pix.transparency);
+		Assert.assertEquals(127,pix.alpha);
 	}
 
 	/*
@@ -95,7 +95,7 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(143,pix.rgb.R);
 		Assert.assertEquals(25,pix.rgb.G);
 		Assert.assertEquals(125,pix.rgb.B);
-		Assert.assertEquals(191,pix.transparency);
+		Assert.assertEquals(191,pix.alpha);
 
 	}
 }

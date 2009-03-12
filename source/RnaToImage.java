@@ -2,10 +2,14 @@ package source;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import org.ahmadsoft.ropes.Rope;
 import org.ahmadsoft.ropes.RopeBuilder;
@@ -21,6 +25,7 @@ public class RnaToImage {
 	  Posn(int x, int y) { this.x = x; this.y = y; }
   }
   private class Bitmap {
+	  // First index is x, second is y.
 	  protected Pixel[][] at = new Pixel[600][600];
   }
   private enum Direction {
@@ -53,6 +58,17 @@ public class RnaToImage {
   private Posn mark = new Posn(0,0);
   private Direction dir = Direction.EAST;
   private ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+  private String rnaOutputFilename;
+  
+  /*
+   * Main method.
+   */
+  public static void main(String args[])
+  {
+	  // TODO: Checking our input.
+	  RnaToImage r2i = new RnaToImage(args[0],args[1]);
+	  r2i.build();
+  }
   
   /*
    * Constructor that takes no arguments. Used for testing.
@@ -62,11 +78,12 @@ public class RnaToImage {
 	  return;
   }
   
-  public RnaToImage(String rnaFilename)
+  public RnaToImage(String rnaInputFilename, String rnaOutputFilename)
   {
 	bitmaps.add(new Bitmap());
+	this.rnaOutputFilename = rnaOutputFilename;
 	try {
-	    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(rnaFilename)));
+	    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(rnaInputFilename)));
 		StringBuilder buildingRNA = new StringBuilder();
 		while (in.ready())
 		{
@@ -226,33 +243,147 @@ public class RnaToImage {
 	  }
   }
   
+  public Pixel getPixel(Posn p)
+  {
+	  return bitmaps.get(0).at[p.x][p.y];
+  }
+  
+  public void setPixel(Posn p)
+  {
+	  Bitmap changedBitmap = bitmaps.get(0);
+	  changedBitmap.at[p.x][p.y] = currentPixel();
+	  bitmaps.set(0,changedBitmap);
+  }
+  
   public void line(Posn start, Posn end)
   {
+	  int deltaX = end.x - start.x;
+	  int deltaY = end.y - start.y;
+	  int d = Math.max(Math.abs(deltaX),Math.abs(deltaY));
+	  int c;
+	  if (deltaX*deltaY <= 0)
+	  {
+		  c = 1;
+	  }
+	  else
+	  {
+		  c = 0;
+	  }
+	  int x = (start.x*d) + ((d-c)/2);
+	  int y = (start.y*d) + ((d-c)/2);
+	  for (int i=0; i<d; i++)
+	  {
+		  setPixel(new Posn(x/d,y/d));
+		  x = x + deltaX;
+		  y = y + deltaY;
+	  }
 	  
   }
   
+  /*
+   * tryfill() : [Attempts to flood-fill the area that 'position' is in]
+   * 
+   * The spec also has a method called fill() that recursively calls itself
+   * to fill in surrounding pixels. This is implemented here by keeping a 
+   * queue of the neighbouring pixels that need to be tested.
+   */
   public void tryfill()
   {
-	  
+	  Pixel newColour = currentPixel();
+	  Pixel oldColour = getPixel(position);
+	  if (!newColour.equals(oldColour))
+	  {
+		  ArrayDeque<Posn> pixelsToTest = new ArrayDeque<Posn>();
+		  pixelsToTest.add(position);
+		  while(pixelsToTest.size() > 0)
+		  {
+			  Posn p = pixelsToTest.removeFirst();
+			  if (getPixel(p).equals(oldColour))
+			  {
+				  setPixel(p);
+				  if (p.x > 0)   pixelsToTest.addLast(new Posn(p.x-1,p.y  ));
+				  if (p.x < 599) pixelsToTest.addLast(new Posn(p.x+1,p.y  ));
+				  if (p.y > 0)   pixelsToTest.addLast(new Posn(p.x  ,p.y-1));
+				  if (p.y < 599) pixelsToTest.addLast(new Posn(p.x  ,p.y+1));
+			  }
+		  }
+		  
+	  }
   }
   
   public void addBitmap(Bitmap b)
   {
-	  
+	  if (bitmaps.size() < 10)
+		  bitmaps.add(0,b);
   }
   
   public void compose()
   {
-	  
+	  if (bitmaps.size() > 1)
+	  {
+		  for (int x=0; x<600; x++)
+		  {
+			  for (int y=0; y<600; y++)
+			  {
+				  Pixel b0 = bitmaps.get(0).at[x][y];
+				  Pixel b1 = bitmaps.get(1).at[x][y];
+				  Bitmap changedBitmap = bitmaps.get(0);
+				  changedBitmap.at[x][y] = new Pixel(
+						                     b0.rgb.R + b1.rgb.R*(255-b0.alpha)/255,
+						                     b0.rgb.G + b1.rgb.G*(255-b0.alpha)/255,
+						                     b0.rgb.B + b1.rgb.B*(255-b0.alpha)/255,
+						                     b0.alpha + b1.alpha*(255-b0.alpha)/255);
+				  bitmaps.set(1,changedBitmap);
+			  }
+		  }
+		  bitmaps.remove(0);
+	  }
   }
   
   public void clip()
   {
-	  
+	  if (bitmaps.size() > 1)
+	  {
+		  for (int x=0; x<600; x++)
+		  {
+			  for (int y=0; y<600; y++)
+			  {
+				  Pixel b0 = bitmaps.get(0).at[x][y];
+				  Pixel b1 = bitmaps.get(1).at[x][y];
+				  Bitmap changedBitmap = bitmaps.get(0);
+				  changedBitmap.at[x][y] = new Pixel(
+						                     b1.rgb.R*b0.alpha/255,
+						                     b1.rgb.G*b0.alpha/255,
+						                     b1.rgb.B*b0.alpha/255,
+						                     b1.alpha*b0.alpha/255);
+				  bitmaps.set(1,changedBitmap);
+			  }
+		  }
+		  bitmaps.remove(0);
+	  }	  
   }
   
   public void draw()
   {
+	  BufferedImage output = new BufferedImage(600,600,BufferedImage.TYPE_INT_ARGB);
+	  Bitmap b = bitmaps.get(0);
+	  for (int x=0; x<600; x++)
+	  {
+		  for (int y=0; y<600; y++)
+		  {
+			int argb = ((b.at[x][y].alpha) >> 24)
+			         + ((b.at[x][y].rgb.R) >> 16)
+			         + ((b.at[x][y].rgb.G) >>  8)
+			         + ((b.at[x][y].rgb.B));
+			output.setRGB(x,y,argb);
+		  }
+	  }
+	  try {
+		  ImageIO.write(output,"png",new File(this.rnaOutputFilename));
+		  System.out.printf("Image written to %s.\n",rnaOutputFilename);
+	  } catch (IOException e) {
+		  System.out.printf("Problem writing to %s.\n",rnaOutputFilename);
+	  }
 	  
   }
 	

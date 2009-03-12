@@ -31,7 +31,7 @@ public class TestDnaToRna extends TestCase {
 	 * TODO: Find a way to specify filenames without absolute paths.
 	 */
 	public void testDnaToRna_verify() {
-		dna2rna = new DnaToRna("","C:/Coding/Endo/resources/endo.dna");
+		dna2rna = new DnaToRna("","C:/Coding/Endo/resources/endo.dna","");
 		Assert.assertFalse(dna2rna.getDNA().equals(DnaToRna.e));
 	}
 	
@@ -40,7 +40,7 @@ public class TestDnaToRna extends TestCase {
 	 * and sets the DNA string as a result to the prefix.
 	 */
 	public void testDnaToRna_prefix_emptyFile() {
-		dna2rna = new DnaToRna("ICFPICFPICFP","C:/Coding/Endo/resources/empty.dna");
+		dna2rna = new DnaToRna("ICFPICFPICFP","C:/Coding/Endo/resources/empty.dna","");
 		Assert.assertEquals("ICFPICFPICFP",dna2rna.getDNA().toString());
 	}
 

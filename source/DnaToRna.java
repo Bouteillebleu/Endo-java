@@ -21,6 +21,14 @@ public class DnaToRna {
 	private Rope DNA = e;
 	private Rope RNA = e;
 	private boolean finish = false;
+	private String outputFilename;
+	
+	public static void main(String args[])
+	{
+		// TODO: Checking our input.
+		DnaToRna d2r = new DnaToRna(args[0],args[1],args[2]);
+		d2r.execute();
+	}
 	
 	// Default constructor that takes no arguments. For testing.
 	public DnaToRna()
@@ -31,11 +39,12 @@ public class DnaToRna {
 	/*
 	 * TODO: Sort out how to do this with the Zip input stream reader?
 	 */
-	public DnaToRna(String prefix, String endoZipFilename)
+	public DnaToRna(String prefix, String endoFilename, String outputFilename)
 	{
+	  this.outputFilename = outputFilename;
 	  try {
 		//BufferedReader in = new BufferedReader(new InputStreamReader(new ZipInputStream(new FileInputStream(endoZipFilename))));
-	    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(endoZipFilename)));
+	    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(endoFilename)));
 		StringBuilder buildingDNA = new StringBuilder();
 		buildingDNA.append(prefix);
 		while (in.ready())
@@ -167,7 +176,7 @@ public class DnaToRna {
 	                  else { level--; p = p.append(")"); }
 	                  break;
 	                case 'I':
-	                  RNA = RNA.append(DNA.subSequence(3,9));
+	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
 	                default:
@@ -257,7 +266,7 @@ public class DnaToRna {
 	                  t = t.append("|");
 	                  break;
 	                case 'I':
-	                  RNA = RNA.append(DNA.subSequence(3,9));
+	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
 	                default:
@@ -645,7 +654,7 @@ public class DnaToRna {
 	  {
 	    // Outputs RNA string to file endo.rna.
 		try {
-		  BufferedWriter buf = new BufferedWriter(new FileWriter("C:/Coding/Endo/endo.rna"));
+		  BufferedWriter buf = new BufferedWriter(new FileWriter(outputFilename));
 		  Iterator<Character> it = RNA.iterator();
 		  while (it.hasNext())
 		  {
@@ -653,6 +662,7 @@ public class DnaToRna {
 		  }
 		  buf.flush();
 		  buf.close();
+		  System.out.printf("RNA written to %s.\n",outputFilename);
 		} catch (IOException e) {
 		  System.out.println("Problem writing to endo.rna.");
 		}
