@@ -19,11 +19,6 @@ public class RnaToImage {
   /*
    * Inner classes.
    */
-  public class Posn {
-	  public int x;
-	  public int y;
-	  Posn(int x, int y) { this.x = x; this.y = y; }
-  }
   public enum Direction {
 	  NORTH,
 	  EAST,

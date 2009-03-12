@@ -2,8 +2,8 @@ package test;
 
 import source.Bitmap;
 import source.Pixel;
+import source.Posn;
 import source.RnaToImage;
-import source.RnaToImage.Posn;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -138,6 +138,21 @@ public class TestRnaToImage extends TestCase {
 	}
 	
 	/*
+	 * As with testRedFill_noRender(), but calls addColor() and tryfill() instead.
+	 */
+	public void testRedFill_noRender_nativeMethods()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addColor(RnaToImage.red);
+		rna2image.tryfill();
+		int[] rgbData = rna2image.flattenImage();
+		for(int i=0; i<600*600; i++)
+		{
+			Assert.assertEquals(0x00ff0000,rgbData[i]);			
+		}
+	}
+	
+	/*
 	 * First test from Figure 21 of the spec.
 	 */
 	public void testCurrentPixel_test1()
@@ -208,6 +223,23 @@ public class TestRnaToImage extends TestCase {
 		Assert.assertEquals(25,pix.rgb.G);
 		Assert.assertEquals(125,pix.rgb.B);
 		Assert.assertEquals(191,pix.alpha);
+	}
+	
+	/*
+	 * Tests that setPixel() does indeed set the specified pixel on 
+	 * bitmap 0. We know currentPixel() works, so this is okay.
+	 */
+	public void testSetPixel_verify()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addColor(RnaToImage.red);
+		rna2image.setPixel(new Posn(127,127));
+		Bitmap b = rna2image.getBitmaps().get(0);
+		Pixel p = b.at[127][127];
+		Assert.assertEquals(255,p.rgb.R);
+		Assert.assertEquals(0,p.rgb.G);
+		Assert.assertEquals(0,p.rgb.B);
+		Assert.assertEquals(255,p.alpha);
 	}
 	
 	/*
