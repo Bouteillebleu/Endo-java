@@ -257,4 +257,14 @@ public class TestRnaToImage extends TestCase {
 		rna2image.writeToFile(data);
 		
 	}
+	
+	/*
+	 * STILL TO TEST:
+	 * - line()
+	 * - addBitmap()
+	 * - compose()
+	 * - clip()
+	 */
+	
+	
 }

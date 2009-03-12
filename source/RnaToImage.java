@@ -374,21 +374,21 @@ public class RnaToImage {
   {
 	  if (bitmaps.size() > 1)
 	  {
+		  Bitmap changedBitmap = bitmaps.get(0);
 		  for (int x=0; x<600; x++)
 		  {
 			  for (int y=0; y<600; y++)
 			  {
 				  Pixel b0 = bitmaps.get(0).at[x][y];
 				  Pixel b1 = bitmaps.get(1).at[x][y];
-				  Bitmap changedBitmap = bitmaps.get(0);
 				  changedBitmap.at[x][y] = new Pixel(
 						                     b0.rgb.R + b1.rgb.R*(255-b0.alpha)/255,
 						                     b0.rgb.G + b1.rgb.G*(255-b0.alpha)/255,
 						                     b0.rgb.B + b1.rgb.B*(255-b0.alpha)/255,
 						                     b0.alpha + b1.alpha*(255-b0.alpha)/255);
-				  bitmaps.set(1,changedBitmap);
 			  }
 		  }
+		  bitmaps.set(1,changedBitmap);
 		  bitmaps.remove(0);
 	  }
   }
@@ -397,21 +397,21 @@ public class RnaToImage {
   {
 	  if (bitmaps.size() > 1)
 	  {
+		  Bitmap changedBitmap = bitmaps.get(0);
 		  for (int x=0; x<600; x++)
 		  {
 			  for (int y=0; y<600; y++)
 			  {
 				  Pixel b0 = bitmaps.get(0).at[x][y];
 				  Pixel b1 = bitmaps.get(1).at[x][y];
-				  Bitmap changedBitmap = bitmaps.get(0);
 				  changedBitmap.at[x][y] = new Pixel(
 						                     b1.rgb.R*b0.alpha/255,
 						                     b1.rgb.G*b0.alpha/255,
 						                     b1.rgb.B*b0.alpha/255,
 						                     b1.alpha*b0.alpha/255);
-				  bitmaps.set(1,changedBitmap);
 			  }
 		  }
+		  bitmaps.set(1,changedBitmap);
 		  bitmaps.remove(0);
 	  }	  
   }
