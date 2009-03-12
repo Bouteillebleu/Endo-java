@@ -18,4 +18,11 @@ public class Pixel {
 		      +this.rgb.B+","
 		      +this.alpha;
 	}
+	
+	public boolean equals(Pixel that) {
+		return (this.rgb.R == that.rgb.R
+			 && this.rgb.G == that.rgb.G
+			 && this.rgb.B == that.rgb.B
+			 && this.alpha == that.alpha);
+	}
 }
