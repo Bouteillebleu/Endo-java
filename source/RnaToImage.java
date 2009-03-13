@@ -330,7 +330,7 @@ public class RnaToImage {
 		  x = x + deltaX;
 		  y = y + deltaY;
 	  }
-	  
+	  setPixel(end);	  
   }
   
   /*

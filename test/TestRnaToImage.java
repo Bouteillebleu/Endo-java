@@ -345,11 +345,11 @@ public class TestRnaToImage extends TestCase {
 			{
 				if (x==y)
 				{
-					//Assert.assertTrue(result.at[x][y].equals(whitePix));
+					Assert.assertTrue(result.at[x][y].equals(whitePix));
 				}
 				else
 				{
-					//Assert.assertTrue(result.at[x][y].equals(blackPix));
+					Assert.assertTrue(result.at[x][y].equals(blackPix));
 				}
 			}
 		}
