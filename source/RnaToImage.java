@@ -67,7 +67,7 @@ public class RnaToImage {
   public RnaToImage()
   {
 	bitmaps.add(new Bitmap());
-    this.rnaOutputFilename = "C:/Coding/Endo/endo.png";
+    this.rnaOutputFilename = "D:/Coding/Endo/endo.png";
   }
   
   /*

@@ -259,10 +259,107 @@ public class TestRnaToImage extends TestCase {
 	}
 	
 	/*
+	 * Test that we can add a default bitmap using addBitmap(),
+	 * and that both bitmaps have the properties we expect.
+	 */
+	public void testAddBitmap()
+	{
+		rna2image = new RnaToImage();
+		Bitmap b = rna2image.getBitmaps().get(0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				b.at[x][y]= new Pixel(255,0,0,255);
+			}
+		}
+		rna2image.setBitmap(b,0);
+		Bitmap newBitmap = new Bitmap();
+		rna2image.addBitmap(newBitmap);
+		Bitmap b0 = rna2image.getBitmaps().get(0);
+		Bitmap b1 = rna2image.getBitmaps().get(1);
+		Pixel redPix = new Pixel(255,0,0,255);
+		Pixel defPix = new Pixel(0,0,0,0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				Assert.assertTrue(b1.at[x][y].equals(redPix));
+				Assert.assertTrue(b0.at[x][y].equals(defPix));
+			}
+		}
+	}
+
+	
+	/*
+	 * Test compose() by blending a semi-transparent red bitmap b0
+	 * and a fully opaque blue bitmap b1.
+	 */
+	public void testCompose()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addBitmap(new Bitmap());
+		Bitmap b0 = new Bitmap();
+		Bitmap b1 = new Bitmap();
+		Pixel transRed = new Pixel(255,0,0,127);
+		Pixel opaqueBlue = new Pixel(0,0,255,255);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				b0.at[x][y] = transRed;
+				b1.at[x][y] = opaqueBlue;
+			}
+		}
+		rna2image.setBitmap(b0,0);
+		rna2image.setBitmap(b1,1);
+		rna2image.compose();
+		Assert.assertEquals(1,rna2image.getBitmaps().size());
+		Pixel comp = new Pixel(255,0,128,255);
+		Bitmap result = rna2image.getBitmaps().get(0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				Assert.assertTrue(result.at[x][y].equals(comp));
+			}
+		}
+
+	}
+	
+	/*
+	 * Test line() by drawing an opaque white line across
+	 * an otherwise transparent black bitmap.
+	 */
+	public void testLine_diagonal()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addColor(RnaToImage.white);
+		rna2image.line(new Posn(0,0),new Posn(599,599));
+		Bitmap result = rna2image.getBitmaps().get(0);
+		Pixel whitePix = new Pixel(255,255,255,255);
+		Pixel blackPix = new Pixel(0,0,0,0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				if (x==y)
+				{
+					//Assert.assertTrue(result.at[x][y].equals(whitePix));
+				}
+				else
+				{
+					//Assert.assertTrue(result.at[x][y].equals(blackPix));
+				}
+			}
+		}
+		int[] rgbData = rna2image.flattenImage();
+		rna2image.writeToFile(rgbData);
+	}
+	
+	/*
 	 * STILL TO TEST:
 	 * - line()
-	 * - addBitmap()
-	 * - compose()
 	 * - clip()
 	 */
 	
