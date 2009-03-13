@@ -358,8 +358,39 @@ public class TestRnaToImage extends TestCase {
 	}
 	
 	/*
+	 * Test that drawing diagonal line and then filling one side gives us
+	 * the result we expect (black triangle and white triangle).
+	 */
+	public void testLine_diagonal_withFill()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addColor(RnaToImage.white);
+		rna2image.line(new Posn(0,0),new Posn(599,599));
+		Bitmap result = rna2image.getBitmaps().get(0);
+		Pixel whitePix = new Pixel(255,255,255,255);
+		Pixel blackPix = new Pixel(0,0,0,0);
+		rna2image.setPosition(new Posn(0,599));
+		rna2image.tryfill();
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				if (x<=y)
+				{
+					Assert.assertTrue(result.at[x][y].equals(whitePix));
+				}
+				else
+				{
+					Assert.assertTrue(result.at[x][y].equals(blackPix));
+				}
+			}
+		}
+		int[] rgbData = rna2image.flattenImage();
+		rna2image.writeToFile(rgbData);		
+	}
+	
+	/*
 	 * STILL TO TEST:
-	 * - line()
 	 * - clip()
 	 */
 	
