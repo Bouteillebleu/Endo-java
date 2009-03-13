@@ -50,6 +50,7 @@ public class RnaToImage {
   private Direction dir = Direction.EAST;
   private ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
   private String rnaOutputFilename;
+  private boolean logging = false;
   
   /*
    * Main method.
@@ -57,7 +58,14 @@ public class RnaToImage {
   public static void main(String args[])
   {
 	  // TODO: Checking our input.
+	  // First two arguments are input and output filenames.
 	  RnaToImage r2i = new RnaToImage(args[0],args[1]);
+	  
+	  // If we've got a third and it's --logging, set logging on, build.
+	  if (args.length > 2 && args[2].equals("--logging"))
+	  {
+		r2i.logging = true; 
+	  }	  
 	  r2i.build();
   }
   
@@ -150,7 +158,8 @@ public class RnaToImage {
 	
   public boolean build()
   {
-	while (RNA.length() >= 7)
+	int stepCount = 0;
+    while (RNA.length() >= 7)
 	{
 		String currentBase = RNA.subSequence(0,7).toString();
 		RNA = RNA.delete(0,7);
@@ -196,6 +205,20 @@ public class RnaToImage {
 			clip();
 		} else {
 			// Do nothing.
+		}
+		if (logging)
+		{
+			if (currentBase.equals("PCCIFFP") ||
+				currentBase.equals("PIIPIIP") ||
+				currentBase.equals("PFFPCCP") ||
+				currentBase.equals("PFFICCF"))
+			{
+				String oldOutput = rnaOutputFilename;
+				rnaOutputFilename = rnaOutputFilename.concat(Integer.toString(stepCount));
+				draw();
+				rnaOutputFilename = oldOutput;
+			}
+			stepCount++;
 		}
 	}
 	boolean drawn = draw();
@@ -447,7 +470,7 @@ public class RnaToImage {
 	boolean imageDrawn = false;
 	output.setRGB(0,0,600,600,data,0,600);
 	try {
-	  File f = new File(this.rnaOutputFilename);
+	  File f = new File(this.rnaOutputFilename+".png");
 	  imageDrawn = ImageIO.write(output,"png",f);
 	  System.out.printf("Image written to %s.\n",rnaOutputFilename);
 	} catch (IOException e) {

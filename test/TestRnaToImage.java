@@ -327,6 +327,60 @@ public class TestRnaToImage extends TestCase {
 
 	}
 	
+
+	/*
+	 * Test clip() by combining a semi-transparent red bitmap b0
+	 * and a fully opaque green bitmap with blue square in top corner b1.
+	 */
+	public void testClip()
+	{
+		rna2image = new RnaToImage();
+		rna2image.addBitmap(new Bitmap());
+		Bitmap b0 = new Bitmap();
+		Bitmap b1 = new Bitmap();
+		Pixel transRed = new Pixel(255,0,0,127);
+		Pixel opaqueBlue = new Pixel(0,0,255,255);
+		Pixel opaqueGreen = new Pixel(0,255,0,255);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				b0.at[x][y] = transRed;
+				if (x < 100 && y < 100)
+				{
+					b1.at[x][y] = opaqueBlue;
+				}
+				else
+				{
+					b1.at[x][y] = opaqueGreen;
+				}
+			}
+		}
+		rna2image.setBitmap(b0,0);
+		rna2image.setBitmap(b1,1);
+		rna2image.clip();
+		Assert.assertEquals(1,rna2image.getBitmaps().size());
+		Pixel clipBlue = new Pixel(0,0,127,127);
+		Pixel clipGreen = new Pixel(0,127,0,127);
+		Bitmap result = rna2image.getBitmaps().get(0);
+		for(int x=0; x<600; x++)
+		{
+			for(int y=0; y<600; y++)
+			{
+				if (x < 100 && y < 100)
+				{
+					Assert.assertTrue(result.at[x][y].equals(clipBlue));					
+				}
+				else
+				{
+					Assert.assertTrue(result.at[x][y].equals(clipGreen));
+				}
+			}
+		}
+
+		
+	}
+	
 	/*
 	 * Test line() by drawing an opaque white line across
 	 * an otherwise transparent black bitmap.

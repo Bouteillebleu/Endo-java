@@ -117,7 +117,7 @@ public class DnaToRna {
 	  {
 	    Rope p = e;
 	    int level = 0;
-	    while(!finish)
+	    while(DNA.length() > 0 && !finish)
 	    {
 	      char charFirst = DNA.charAt(0);
 	      switch (charFirst)
@@ -181,17 +181,20 @@ public class DnaToRna {
 	                  break;
 	                default:
 	                  finish = true;
+	                  break;
 	              }
 	              break;
 	            default:
 	              finish = true;
+	              break;
 	          }
 	          break;
 	        default:
 	          finish = true;
+	          break;
 	      }
 	    }
-	    return e;
+	    return p;
 	  }
 
 	  /*
@@ -239,14 +242,14 @@ public class DnaToRna {
 	            case 'F': /* FALL THRU */
 	            case 'P':
 	              DNA = DNA.delete(0,2);
-	              int l = nat();
+	              int level = nat();
 	              if (finish) break;
 	              int n = nat();
 	              if (finish) break;
 	              t = t.append("<");
 	              t = t.append(Integer.toString(n));
 	              t = t.append("_");
-	              t = t.append(Integer.toString(l));
+	              t = t.append(Integer.toString(level));
 	              t = t.append(">");
 	              break;
 	            case 'I':
@@ -271,14 +274,17 @@ public class DnaToRna {
 	                  break;
 	                default:
 	                  finish = true;
+	                break;
 	              }
 	              break;
 	            default:
 	              finish = true;
+	              break;
 	          }
 	          break;
 	        default:
 	          finish = true;
+	          break;
 	      }
 	    }
 	    return e;
