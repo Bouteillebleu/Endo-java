@@ -22,13 +22,42 @@ public class DnaToRna {
 	private Rope RNA = e;
 	private boolean finish = false;
 	private String outputFilename;
+	private boolean logging = false;
+	private BufferedWriter debugbuf;
 	
 	public static void main(String args[])
 	{
 		// TODO: Checking our input.
 		DnaToRna d2r = new DnaToRna(args[0],args[1],args[2]);
+
+		// If we've got a fourth and it's --logging, set logging on, build.
+		if (args.length > 3 && args[3].equals("--logging"))
+		{
+		  d2r.logging = true;
+		  try {
+			  d2r.debugbuf = new BufferedWriter(new FileWriter("C:/Coding/Endo/endo.log"));
+			  d2r.debugbuf.write("Endo DNA processing log");
+			  d2r.debugbuf.newLine();
+			  d2r.debugbuf.write("=======================");
+			  d2r.debugbuf.newLine();
+			  d2r.debugbuf.flush();
+		  } catch (IOException e) {
+			  System.out.println("Problem writing to Endo debug log.");
+		      e.printStackTrace();
+		  }
+		}
+		
 		d2r.execute();
-	}
+		if (d2r.logging)
+		{
+			try { 
+				d2r.debugbuf.close();
+			} catch (IOException e) {
+				System.out.println("Problem closing Endo debug log.");
+				e.printStackTrace();
+			}
+		}
+}
 	
 	// Default constructor that takes no arguments. For testing.
 	public DnaToRna()
@@ -55,7 +84,7 @@ public class DnaToRna {
 	  } catch (IOException e) {
 	    System.out.println("Problem with reading from Endo's DNA file.");
 	    e.printStackTrace();
-	  }  
+	  }
 	}
 	
 	/*
@@ -123,15 +152,18 @@ public class DnaToRna {
 	      switch (charFirst)
 	      {
 	        case 'C':
+		      if (logging) writeLog("Pattern (append I)");
 	          DNA = DNA.delete(0,1);
 	          p = p.append("I");
 	          break;	  
 	        case 'F':
-	          DNA = DNA.delete(0,1);
+	          if (logging) writeLog("Pattern (append C)");
+		      DNA = DNA.delete(0,1);
 	          p = p.append("C");
 	          break;
 	        case 'P':
-	          DNA = DNA.delete(0,1);
+	          if (logging) writeLog("Pattern (append F)");
+		      DNA = DNA.delete(0,1);
 	          p = p.append("F");
 	          break;
 	        case 'I':
@@ -139,10 +171,12 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
+	              if (logging) writeLog("Pattern (append P)");
 	              DNA = DNA.delete(0,2);
 	              p = p.append("P");
 	              break;
 	            case 'P':
+	              if (logging) writeLog("Pattern (append nat)");
 	              DNA = DNA.delete(0,2);
 	              int n = nat();
 	              if (finish) break;
@@ -152,6 +186,7 @@ public class DnaToRna {
 	              p = p.append("}");
 	              break;	      
 	            case 'F':
+	              if (logging) writeLog("Pattern (append seq)");
 	              DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
@@ -165,17 +200,20 @@ public class DnaToRna {
 	              switch (charThird)
 	              {
 	                case 'P':
+	                  if (logging) writeLog("Pattern (level +)");
 	                  DNA = DNA.delete(0,3);
 	                  level++;
 	                  p = p.append("(");
 	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
+	                  if (logging) writeLog("Pattern (level -)");
 	                  DNA = DNA.delete(0,3);
 	                  if (level == 0) return p;
 	                  else { level--; p = p.append(")"); }
 	                  break;
 	                case 'I':
+	                  if (logging) writeLog("Pattern (write RNA)");
 	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
@@ -220,14 +258,17 @@ public class DnaToRna {
 	      switch (charFirst)
 	      {
 	        case 'C':
+	          if (logging) writeLog("Template (append I)");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("I");
 	          break;	  
 	        case 'F':
+	          if (logging) writeLog("Template (append C)");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("C");
 	          break;
 	        case 'P':
+	          if (logging) writeLog("Template (append F)");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("F");
 	          break;
@@ -236,11 +277,13 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
+	              if (logging) writeLog("Template (append P)");
 	              DNA = DNA.delete(0,2);
 	              t = t.append("P");
 	              break;
 	            case 'F': /* FALL THRU */
 	            case 'P':
+	              if (logging) writeLog("Template (reference)");
 	              DNA = DNA.delete(0,2);
 	              int level = nat();
 	              if (finish) break;
@@ -258,9 +301,11 @@ public class DnaToRna {
 	              {
 	                case 'C': /* FALL THRU */
 	                case 'F':
+	                  if (logging) writeLog("Template (end)");
 	                  DNA = DNA.delete(0,3);
 	                  return t;
 	                case 'P':
+	                  if (logging) writeLog("Template (length)");
 	                  DNA = DNA.delete(0,3);
 		              int m = nat();
 		              if (finish) break;
@@ -269,6 +314,7 @@ public class DnaToRna {
 	                  t = t.append("|");
 	                  break;
 	                case 'I':
+	                  if (logging) writeLog("Template (write RNA)");
 	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
@@ -318,6 +364,7 @@ public class DnaToRna {
 			    case 'C': /* FALL THRU */
 			    case 'F': /* FALL THRU */
 			    case 'P':
+			    	if (logging) writeLog("Matching (base)");
 			    	pat = pat.delete(0,1);
 			    	if (DNA.charAt(index) == currentChar)
 			    	{
@@ -330,6 +377,7 @@ public class DnaToRna {
 			    	break;
 			    case '{':
 			    	// Deal with skip case.
+			    	if (logging) writeLog("Matching (skip)");
 			    	pat = pat.delete(0,1); // gets rid of the '{'.
 			    	char nextChar = pat.charAt(0);
 			    	int n = 0;
@@ -347,6 +395,7 @@ public class DnaToRna {
 			    	break;
 			    case '[':
 			    	// Deal with search case.
+			    	if (logging) writeLog("Matching (search)");
 			    	StringBuilder s = new StringBuilder();
 			    	pat = pat.delete(0,1); // gets rid of the '['.
 			    	nextChar = pat.charAt(0);
@@ -368,11 +417,13 @@ public class DnaToRna {
 			    	break;
 			    case '(':
 			    	// Deal with opening group.
+			    	if (logging) writeLog("Matching (group open)");
 			    	pat = pat.delete(0,1); // gets rid of the '('.
 			    	openItems.add(0,index);
 			    	break;
 			    case ')':
 			    	// Deal with closing group.
+			    	if (logging) writeLog("Matching (group close)");
 			    	pat = pat.delete(0,1); // gets rid of the ')'.
 			    	environment.add(DNA.subSequence(openItems.get(0),index));
 			    	openItems.remove(0);
@@ -405,10 +456,12 @@ public class DnaToRna {
 			  	case 'C': /* FALL THRU */
 			  	case 'F': /* FALL THRU */
 			  	case 'P':
+			  		if (logging) writeLog("Replacing (base)");
 			  		t = t.delete(0,1);  
 			  		r = r.append(currentChar);
 			  		break;
 			  	case '<':
+			    	if (logging) writeLog("Replacing (reference)");
 			  		t = t.delete(0,1); // gets rid of the '<'.
 			    	char nextChar = t.charAt(0);
 			    	int n = 0;
@@ -436,6 +489,7 @@ public class DnaToRna {
 			    	}
 			    	break;
 			  	case '|':
+			    	if (logging) writeLog("Replacing (length)");
 			  		t = t.delete(0,1); // gets rid of the initial '|'.
 			    	nextChar = t.charAt(0);
 			    	n = 0;
@@ -457,6 +511,7 @@ public class DnaToRna {
 			  }
 		  }
 		  DNA = r.append(DNA);
+          if (logging) writeLog("Replacing done");
 	  }
 	  
 	  /*
@@ -555,20 +610,24 @@ public class DnaToRna {
 			switch (DNA.charAt(0))
 			{
 			  case 'C':
+		    	if (logging) writeLog("consts (adding I)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("I");
 				break;
 			  case 'F':
+				if (logging) writeLog("consts (adding C)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("C");
 				break;
 			  case 'P':
+				if (logging) writeLog("consts (adding F)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("F");
 				break;
 			  case 'I':
 				if (DNA.charAt(1) == 'C')
 				{
+					if (logging) writeLog("consts (adding P)");
 					DNA = DNA.delete(0,2);
 					decoded = decoded.append("P");
 				}
@@ -658,6 +717,7 @@ public class DnaToRna {
 	  
 	  private void finish()
 	  {
+		  if (logging) writeLog("Finished processing (writing RNA to file)");
 	    // Outputs RNA string to file endo.rna.
 		try {
 		  BufferedWriter buf = new BufferedWriter(new FileWriter(outputFilename));
@@ -673,6 +733,19 @@ public class DnaToRna {
 		  System.out.println("Problem writing to endo.rna.");
 		}
 	  }
-
+	  
+	  private void writeLog(String step)
+	  {
+		  try {
+			  debugbuf.write("Step: "+step+", ");
+			  debugbuf.write("DNA length: "+DNA.length()+", ");
+			  debugbuf.write("Start of DNA: "+DNA.subSequence(0,Math.min(10,DNA.length())));
+			  debugbuf.newLine();
+			  debugbuf.flush();
+		  } catch (IOException e) {
+			  System.out.println("Problem writing to Endo debug log in writeLog.");
+			  e.printStackTrace();
+		  }
+	  }
 	
 }
