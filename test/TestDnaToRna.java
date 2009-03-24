@@ -208,20 +208,24 @@ public class TestDnaToRna extends TestCase {
 		dna2rna = new DnaToRna();
 		dna2rna.setDNA("IIPIPICPIICICIIFICCIFCCCPPIICCFPC");
 	    Rope p = dna2rna.pattern();
+	    Assert.assertEquals("({2})P",p.toString());
 	    Rope t = dna2rna.template();
+	    Assert.assertEquals("PI<0_7>",t.toString());
 	    dna2rna.matchreplace(p,t);
 	    Assert.assertEquals("PIICCFCFFPC",dna2rna.getDNA().toString());
 	}
 
 	/*
-	 * Full iteration test 1 from Figure 16 of spec.
+	 * Full iteration test 3 from Figure 16 of spec.
 	 */
 	public void testFullIteration_test3()
 	{
 		dna2rna = new DnaToRna();
 		dna2rna.setDNA("IIPIPIICPIICIICCIICFCFC");
 	    Rope p = dna2rna.pattern();
+	    Assert.assertEquals("({4})",p.toString());
 	    Rope t = dna2rna.template();
+	    Assert.assertEquals("I",t.toString());
 	    dna2rna.matchreplace(p,t);
 	    Assert.assertEquals("I",dna2rna.getDNA().toString());
 	}

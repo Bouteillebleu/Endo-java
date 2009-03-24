@@ -399,7 +399,7 @@ public class DnaToRna {
 			    	}
 			    	pat = pat.delete(0,1); // gets rid of the '}'.
 			    	index += n;
-			    	if (index > DNA.length())
+			    	if (index >= DNA.length())
 			    	{
 			    		return;
 			    	}
@@ -417,7 +417,7 @@ public class DnaToRna {
 			    	}
 			    	pat = pat.delete(0,1); // gets rid of the ']'.
 			    	int firstMatch = DNA.indexOf(s.toString(),index);
-			    	if (firstMatch > index) // This covers case where firstMatch is -1, i.e. no match
+			    	if (firstMatch >= index) // This covers case where firstMatch is -1, i.e. no match
 			    	{
 			    		index = firstMatch;
 			    	}
