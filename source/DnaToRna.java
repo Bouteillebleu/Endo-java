@@ -22,9 +22,11 @@ public class DnaToRna {
 	private Rope RNA = e;
 	private boolean finish = false;
 	private String outputFilename;
-	private boolean logging = false;
-	private boolean verbose = false; // Verbose debugging or not.
+	private boolean overlyVerbose = false;
+	private boolean traceFormat = false; // Logging uses the format from endo.trace 
 	private BufferedWriter debugbuf;
+	private enum LogLevel { NONE, TRACE, VERBOSE, OVERLYVERBOSE };
+	private LogLevel logging = LogLevel.NONE;
 	
 	public static void main(String args[])
 	{
@@ -32,9 +34,8 @@ public class DnaToRna {
 		DnaToRna d2r = new DnaToRna(args[0],args[1],args[2]);
 
 		// If we've got a fourth and it's --logging, set logging on, build.
-		if (args.length > 3 && args[3].equals("--logging"))
+		if (args.length > 3 && args[3].startsWith("--logging"))
 		{
-		  d2r.logging = true;
 		  try {
 			  d2r.debugbuf = new BufferedWriter(new FileWriter("C:/Coding/Endo/endo.log"));
 			  d2r.debugbuf.write("Endo DNA processing log");
@@ -46,14 +47,23 @@ public class DnaToRna {
 			  System.out.println("Problem writing to Endo debug log.");
 		      e.printStackTrace();
 		  }
-		}
-		if (args.length > 4 && args[4].equals("--verbose"))
-		{
-			d2r.verbose = true;
+		  if (args[3].equals("--logging=verbose"))
+		  {
+			d2r.logging = LogLevel.OVERLYVERBOSE;
+		  }
+		  else if (args[3].equals("--logging=trace"))
+		  {
+			d2r.logging = LogLevel.TRACE;
+		  }
+		  else
+		  {
+			d2r.logging = LogLevel.VERBOSE;
+		  }
+
 		}
 		
 		d2r.execute();
-		if (d2r.logging)
+		if (d2r.logging != LogLevel.NONE)
 		{
 			try { 
 				d2r.debugbuf.close();
@@ -118,15 +128,29 @@ public class DnaToRna {
 
 	public void execute()
 	  {
+		int iteration = 0;
 	    while(!finish)
 	    {
+	      if (logging == LogLevel.TRACE) writeLog("iteration "+iteration+"\n");
+	      if (logging == LogLevel.TRACE) writeLog("dna = "
+	    		  +DNA.subSequence(0,Math.min(10,DNA.length()))
+	    		  +(DNA.length()>10 ? "... " : " ")
+	    		  +"("+DNA.length()+" bases)\n");
 	      // Define a pattern type, set it to p.
 	      Rope p = pattern();
+	      if (logging == LogLevel.TRACE) writeLog("pattern "
+	    		  +p.toString()+"\n");
 	      if(finish) break;
 	      // Define a template type, set it to t.
 	      Rope t = template();
+	      if (logging == LogLevel.TRACE) writeLog("template "
+	    		  +t.toString()+"\n");
 	      if(finish) break;
 	      matchreplace(p,t);
+	      if (logging == LogLevel.TRACE) writeLog("len(rna) = "
+	    		  +RNA.length()/7+"\n");
+	      if (logging == LogLevel.TRACE) writeLog("\n");
+	      ++iteration;
 	    }
 	    finish();
 	  }
@@ -157,17 +181,20 @@ public class DnaToRna {
 	      switch (charFirst)
 	      {
 	        case 'C':
-		      if (logging ) writeLog(verbose ? "Pattern (append I)" : "I");
+		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append I)");
+		      if (logging == LogLevel.VERBOSE) writeLog("I");
 	          DNA = DNA.delete(0,1);
 	          p = p.append("I");
 	          break;	  
 	        case 'F':
-	          if (logging) writeLog(verbose ? "Pattern (append C)" : "C");
+			  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append C)");
+		      if (logging == LogLevel.VERBOSE) writeLog("C");
 		      DNA = DNA.delete(0,1);
 	          p = p.append("C");
 	          break;
 	        case 'P':
-	          if (logging) writeLog(verbose ? "Pattern (append F)" : "F");
+		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append F)");
+		      if (logging == LogLevel.VERBOSE) writeLog("F");
 		      DNA = DNA.delete(0,1);
 	          p = p.append("F");
 	          break;
@@ -176,15 +203,16 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
-	              if (logging) writeLog(verbose ? "Pattern (append P)" : "P");
+	  		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append P)");
+			      if (logging == LogLevel.VERBOSE) writeLog("P");
 	              DNA = DNA.delete(0,2);
 	              p = p.append("P");
 	              break;
 	            case 'P':
-	              if (logging && verbose) writeLog("Pattern (append nat)");
+	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append nat)");
 	              DNA = DNA.delete(0,2);
 	              int n = nat();
-	              if (logging && !verbose) writeLog("{"+n+"}");
+	              if (logging == LogLevel.VERBOSE) writeLog("{"+n+"}");
 	              if (finish) break;
 	              // Add "Skip the next n bases" as "{n}".
 	              p = p.append("{");
@@ -192,11 +220,11 @@ public class DnaToRna {
 	              p = p.append("}");
 	              break;	      
 	            case 'F':
-	              if (logging && verbose) writeLog("Pattern (append seq)");
+	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append seq)");
 	              DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
-	              if (logging && !verbose) writeLog("["+s.toString()+"]");
+	              if (logging == LogLevel.VERBOSE) writeLog("["+s.toString()+"]");
 	              // Add "Search for the sequence s" as "[s]".
 	              p = p.append("[");
 	              p = p.append(s);
@@ -207,21 +235,21 @@ public class DnaToRna {
 	              switch (charThird)
 	              {
 	                case 'P':
-	                  if (logging) writeLog(verbose ? "Pattern (level +)" : "(");
+	                  if (logging) writeLog(overlyVerbose ? "Pattern (level +)" : "(");
 	                  DNA = DNA.delete(0,3);
 	                  level++;
 	                  p = p.append("(");
 	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
-	                  if (logging && verbose) writeLog("Pattern (level -)");
+	                  if (logging && overlyVerbose) writeLog("Pattern (level -)");
 	                  DNA = DNA.delete(0,3);
 	                  if (level == 0) return p;
 	                  else { level--; p = p.append(")"); }
-	                  if (logging && !verbose) writeLog(")");
+	                  if (logging && !overlyVerbose && !traceFormat) writeLog(")");
 	                  break;
 	                case 'I':
-	                  if (logging && verbose) writeLog("Pattern (write RNA)");
+	                  if (logging && overlyVerbose) writeLog("Pattern (write RNA)");
 	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
@@ -254,7 +282,7 @@ public class DnaToRna {
 	   */
 	  public Rope template()
 	  {
-		if (logging && !verbose) writeLog(" -> ");
+		if (logging && !overlyVerbose && !traceFormat) writeLog(" -> ");
 	    Rope t = e;
 	    while(DNA.length() > 0 && !finish)
 	    {
@@ -267,17 +295,17 @@ public class DnaToRna {
 	      switch (charFirst)
 	      {
 	        case 'C':
-	          if (logging) writeLog(verbose ? "Template (append I)" : "I");
+	          if (logging) writeLog(overlyVerbose ? "Template (append I)" : "I");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("I");
 	          break;	  
 	        case 'F':
-	          if (logging) writeLog(verbose ? "Template (append C)" : "C");
+	          if (logging) writeLog(overlyVerbose ? "Template (append C)" : "C");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("C");
 	          break;
 	        case 'P':
-	          if (logging) writeLog(verbose ? "Template (append F)" : "F");
+	          if (logging) writeLog(overlyVerbose ? "Template (append F)" : "F");
 	          DNA = DNA.delete(0,1);
 	          t = t.append("F");
 	          break;
@@ -286,13 +314,13 @@ public class DnaToRna {
 	          switch (charSecond)
 	          {
 	            case 'C':
-	              if (logging) writeLog(verbose ? "Template (append P)" : "P");
+	              if (logging) writeLog(overlyVerbose ? "Template (append P)" : "P");
 	              DNA = DNA.delete(0,2);
 	              t = t.append("P");
 	              break;
 	            case 'F': /* FALL THRU */
 	            case 'P':
-	              if (logging && verbose) writeLog("Template (reference)");
+	              if (logging && overlyVerbose) writeLog("Template (reference)");
 	              DNA = DNA.delete(0,2);
 	              int level = nat();
 	              if (finish) break;
@@ -303,7 +331,7 @@ public class DnaToRna {
 	              t = t.append("_");
 	              t = t.append(Integer.toString(level));
 	              t = t.append(">");
-	              if (logging && !verbose) writeLog("<"+n+"_"+level+">");
+	              if (logging && !overlyVerbose && !traceFormat) writeLog("<"+n+"_"+level+">");
 	              break;
 	            case 'I':
 	              char charThird = DNA.charAt(2);
@@ -311,21 +339,21 @@ public class DnaToRna {
 	              {
 	                case 'C': /* FALL THRU */
 	                case 'F':
-	                  if (logging) writeLog(verbose ? "Template (end)" : "\n");
+	                  if (logging) writeLog(overlyVerbose ? "Template (end)" : "\n");
 	                  DNA = DNA.delete(0,3);
 	                  return t;
 	                case 'P':
-	                  if (logging && verbose) writeLog("Template (length)");
+	                  if (logging && overlyVerbose) writeLog("Template (length)");
 	                  DNA = DNA.delete(0,3);
 		              int m = nat();
 		              if (finish) break;
 	                  t = t.append("|");
 		              t = t.append(Integer.toString(m));
 	                  t = t.append("|");
-	                  if (logging & !verbose) writeLog("|"+m+"|");
+	                  if (logging & !overlyVerbose && !traceFormat) writeLog("|"+m+"|");
 	                  break;
 	                case 'I':
-	                  if (logging && verbose) writeLog("Template (write RNA)");
+	                  if (logging && overlyVerbose) writeLog("Template (write RNA)");
 	                  RNA = RNA.append(DNA.subSequence(3,10));
 	                  DNA = DNA.delete(0,10);
 	                  break;
@@ -375,7 +403,7 @@ public class DnaToRna {
 			    case 'C': /* FALL THRU */
 			    case 'F': /* FALL THRU */
 			    case 'P':
-			    	if (logging && verbose) writeLog("Matching (base)");
+			    	if (logging && overlyVerbose) writeLog("Matching (base)");
 			    	pat = pat.delete(0,1);
 			    	if (DNA.charAt(index) == currentChar)
 			    	{
@@ -383,12 +411,13 @@ public class DnaToRna {
 			    	}
 			    	else
 			    	{
+			    		if (logging && traceFormat) writeLog("failed match\n");
 			    		return;
 			    	}
 			    	break;
 			    case '{':
 			    	// Deal with skip case.
-			    	if (logging && verbose) writeLog("Matching (skip)");
+			    	if (logging && overlyVerbose) writeLog("Matching (skip)");
 			    	pat = pat.delete(0,1); // gets rid of the '{'.
 			    	char nextChar = pat.charAt(0);
 			    	int n = 0;
@@ -401,12 +430,13 @@ public class DnaToRna {
 			    	index += n;
 			    	if (index >= DNA.length())
 			    	{
+			    		if (logging && traceFormat) writeLog("failed match\n");
 			    		return;
 			    	}
 			    	break;
 			    case '[':
 			    	// Deal with search case.
-			    	if (logging && verbose) writeLog("Matching (search)");
+			    	if (logging && overlyVerbose) writeLog("Matching (search)");
 			    	StringBuilder s = new StringBuilder();
 			    	pat = pat.delete(0,1); // gets rid of the '['.
 			    	nextChar = pat.charAt(0);
@@ -423,18 +453,19 @@ public class DnaToRna {
 			    	}
 			    	else
 			    	{
+			    		if (logging && traceFormat) writeLog("failed match\n");
 			    		return;
 			    	}
 			    	break;
 			    case '(':
 			    	// Deal with opening group.
-			    	if (logging && verbose) writeLog("Matching (group open)");
+			    	if (logging && overlyVerbose) writeLog("Matching (group open)");
 			    	pat = pat.delete(0,1); // gets rid of the '('.
 			    	openItems.add(0,index);
 			    	break;
 			    case ')':
 			    	// Deal with closing group.
-			    	if (logging && verbose) writeLog("Matching (group close)");
+			    	if (logging && overlyVerbose) writeLog("Matching (group close)");
 			    	pat = pat.delete(0,1); // gets rid of the ')'.
 			    	environment.add(DNA.subSequence(openItems.get(0),index));
 			    	openItems.remove(0);
@@ -442,6 +473,18 @@ public class DnaToRna {
 			  }
 		  }
 		DNA = DNA.delete(0,index);
+		if (logging && traceFormat)
+		{
+			writeLog("successful match of length "+index+"\n");
+			for (int loop=0; loop<environment.size(); ++loop)
+			{
+				writeLog("e["+loop+"] = "
+					+RNA.subSequence(0,Math.min(10,DNA.length()))
+			    	+(RNA.length()>10 ? "... " : " ")
+			    	+"("+RNA.length()+" bases)\n");
+
+			}
+		}
 		replace(t,environment);
 	  }
 	  
@@ -467,12 +510,12 @@ public class DnaToRna {
 			  	case 'C': /* FALL THRU */
 			  	case 'F': /* FALL THRU */
 			  	case 'P':
-			  		if (logging && verbose) writeLog("Replacing (base)");
+			  		if (logging && overlyVerbose) writeLog("Replacing (base)");
 			  		t = t.delete(0,1);  
 			  		r = r.append(currentChar);
 			  		break;
 			  	case '<':
-			    	if (logging && verbose) writeLog("Replacing (reference)");
+			    	if (logging && overlyVerbose) writeLog("Replacing (reference)");
 			  		t = t.delete(0,1); // gets rid of the '<'.
 			    	char nextChar = t.charAt(0);
 			    	int n = 0;
@@ -500,7 +543,7 @@ public class DnaToRna {
 			    	}
 			    	break;
 			  	case '|':
-			    	if (logging && verbose) writeLog("Replacing (length)");
+			    	if (logging && overlyVerbose) writeLog("Replacing (length)");
 			  		t = t.delete(0,1); // gets rid of the initial '|'.
 			    	nextChar = t.charAt(0);
 			    	n = 0;
@@ -522,7 +565,7 @@ public class DnaToRna {
 			  }
 		  }
 		  DNA = r.append(DNA);
-          if (logging && verbose) writeLog("Replacing done");
+          if (logging && overlyVerbose) writeLog("Replacing done");
 	  }
 	  
 	  /*
@@ -621,24 +664,24 @@ public class DnaToRna {
 			switch (DNA.charAt(0))
 			{
 			  case 'C':
-		    	if (logging && verbose) writeLog("consts (adding I)");
+		    	if (logging && overlyVerbose) writeLog("consts (adding I)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("I");
 				break;
 			  case 'F':
-				if (logging && verbose) writeLog("consts (adding C)");
+				if (logging && overlyVerbose) writeLog("consts (adding C)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("C");
 				break;
 			  case 'P':
-				if (logging && verbose) writeLog("consts (adding F)");
+				if (logging && overlyVerbose) writeLog("consts (adding F)");
 				DNA = DNA.delete(0,1);
 				decoded = decoded.append("F");
 				break;
 			  case 'I':
 				if (DNA.charAt(1) == 'C')
 				{
-					if (logging && verbose) writeLog("consts (adding P)");
+					if (logging && overlyVerbose) writeLog("consts (adding P)");
 					DNA = DNA.delete(0,2);
 					decoded = decoded.append("P");
 				}
@@ -748,7 +791,7 @@ public class DnaToRna {
 	  private void writeLog(String step)
 	  {
 		  try {
-			  if (verbose)
+			  if (overlyVerbose)
 			  {
 				  debugbuf.write("Step: "+step+", ");
 				  debugbuf.write("DNA length: "+DNA.length()+", ");
