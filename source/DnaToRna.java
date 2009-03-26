@@ -676,39 +676,42 @@ public class DnaToRna {
 	  public Rope consts()
 	  {
 		Rope decoded = e;
+		int index = 0;
 		while(DNA.length()>0)
 		{
-			switch (DNA.charAt(0))
+			switch (DNA.charAt(index))
 			{
 			  case 'C':
 		    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding I)");
-				DNA = DNA.delete(0,1);
+				index += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("I");
 				break;
 			  case 'F':
 				if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding C)");
-				DNA = DNA.delete(0,1);
+				index += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("C");
 				break;
 			  case 'P':
 				if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding F)");
-				DNA = DNA.delete(0,1);
+				index += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("F");
 				break;
 			  case 'I':
 				if (DNA.charAt(1) == 'C')
 				{
 					if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding P)");
-					DNA = DNA.delete(0,2);
+					index += 2; //DNA = DNA.delete(0,2);
 					decoded = decoded.append("P");
 				}
 				else
 				{
+					DNA = DNA.delete(0,index);
 					return decoded;
 				}
 			}
 		}
 		finish = true;
+		DNA = DNA.delete(0,index);
 		return decoded;
 
 		/*
