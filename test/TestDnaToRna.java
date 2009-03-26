@@ -186,6 +186,41 @@ public class TestDnaToRna extends TestCase {
 	}
 	
 	/*
+	 * Testing the search part of matchreplace(),
+	 * with the search result occurring immediately in the remaining DNA.
+	 */
+	public void testMatchreplace_search_immediateMatch()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("ICIIPIFPCFPICIICICIIFIFPPIFPPIICPICFPP");
+		Rope p = dna2rna.pattern(); // "ICIIPIFPCFPICIICICIIF"
+		Assert.assertEquals("P([ICFP])P",p.toString());
+		Rope t = dna2rna.template(); // "IFPPIFPPIIC"
+		Assert.assertEquals("<0_0><0_0>",t.toString());
+		ArrayList<Rope> env = dna2rna.matchreplace(p,t);
+		Assert.assertEquals(1,env.size());
+		Assert.assertEquals("ICFP",env.get(0).toString());
+	}
+	
+	/*
+	 * Testing the search part of matchreplace(),
+	 * with the search result occurring after five characters
+	 * in the remaining DNA.
+	 */
+	public void testMatchreplace_search_delayedMatch()
+	{
+		dna2rna = new DnaToRna();
+		dna2rna.setDNA("ICIIPIFPCFPICIICICIIFIFPPIFPPIICPIIFFFICFPP");
+		Rope p = dna2rna.pattern(); // "ICIIPIFPCFPICIICICIIF"
+		Assert.assertEquals("P([ICFP])P",p.toString());
+		Rope t = dna2rna.template(); // "IFPPIFPPIIC"
+		Assert.assertEquals("<0_0><0_0>",t.toString());
+		ArrayList<Rope> env = dna2rna.matchreplace(p,t);
+		Assert.assertEquals(1,env.size());
+		Assert.assertEquals("IIFFFICFP",env.get(0).toString());
+	}
+
+	/*
 	 * Full iteration test 1 from Figure 16 of spec.
 	 */
 	public void testFullIteration_test1()

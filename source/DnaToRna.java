@@ -23,7 +23,7 @@ public class DnaToRna {
 	private boolean finish = false;
 	private String outputFilename;
 	private BufferedWriter debugbuf;
-	private enum LogLevel { NONE, TRACE, VERBOSE, OVERLYVERBOSE };
+	private enum LogLevel { NONE, TRACE, VERBOSE, OVERLYVERBOSE, ITERATIONS };
 	private LogLevel logging = LogLevel.NONE;
 	
 	public static void main(String args[])
@@ -34,29 +34,36 @@ public class DnaToRna {
 		// If we've got a fourth and it's --logging, set logging on, build.
 		if (args.length > 3 && args[3].startsWith("--logging"))
 		{
-		  try {
-			  d2r.debugbuf = new BufferedWriter(new FileWriter("D:/Coding/Endo/endo.log"));
-			  d2r.debugbuf.write("Endo DNA processing log");
-			  d2r.debugbuf.newLine();
-			  d2r.debugbuf.write("=======================");
-			  d2r.debugbuf.newLine();
-			  d2r.debugbuf.flush();
-		  } catch (IOException e) {
-			  System.out.println("Problem writing to Endo debug log.");
-		      e.printStackTrace();
-		  }
-		  if (args[3].equals("--logging=verbose"))
-		  {
-			d2r.logging = LogLevel.OVERLYVERBOSE;
-		  }
-		  else if (args[3].equals("--logging=trace"))
-		  {
-			d2r.logging = LogLevel.TRACE;
-		  }
-		  else
-		  {
-			d2r.logging = LogLevel.VERBOSE;
-		  }
+			if (args[3].equals("--logging=iterations"))
+			{
+				d2r.logging = LogLevel.ITERATIONS;
+			}
+			else
+			{
+			  try {
+				  d2r.debugbuf = new BufferedWriter(new FileWriter("D:/Coding/Endo/endo.log"));
+				  d2r.debugbuf.write("Endo DNA processing log");
+				  d2r.debugbuf.newLine();
+				  d2r.debugbuf.write("=======================");
+				  d2r.debugbuf.newLine();
+				  d2r.debugbuf.flush();
+			  } catch (IOException e) {
+				  System.out.println("Problem writing to Endo debug log.");
+			      e.printStackTrace();
+			  }
+			  if (args[3].equals("--logging=verbose"))
+			  {
+				d2r.logging = LogLevel.OVERLYVERBOSE;
+			  }
+			  else if (args[3].equals("--logging=trace"))
+			  {
+				d2r.logging = LogLevel.TRACE;
+			  }
+			  else
+			  {
+				d2r.logging = LogLevel.VERBOSE;
+			  }
+			}
 
 		}
 		
@@ -127,8 +134,10 @@ public class DnaToRna {
 	public void execute()
 	  {
 		int iteration = 0;
-	    while(!finish)
+		//long startTime = System.currentTimeMillis();
+	    while(!finish) // && (System.currentTimeMillis() - startTime < 10000))
 	    {
+	      if (logging == LogLevel.ITERATIONS) System.out.println("Onto iteration "+iteration);
 	      if (logging == LogLevel.TRACE) writeLog("iteration "+iteration+"\n");
 	      if (logging == LogLevel.TRACE) writeLog("dna = "
 	    		  +DNA.subSequence(0,Math.min(10,DNA.length()))
@@ -450,7 +459,7 @@ public class DnaToRna {
 			    	  nextChar = pat.charAt(0);
 			    	}
 			    	pat = pat.delete(0,1); // gets rid of the ']'.
-			    	int firstMatch = DNA.indexOf(s.toString(),index);
+			    	int firstMatch = DNA.indexOf(s.toString(),index) + s.length();
 			    	if (firstMatch >= index) // This covers case where firstMatch is -1, i.e. no match
 			    	{
 			    		index = firstMatch;
