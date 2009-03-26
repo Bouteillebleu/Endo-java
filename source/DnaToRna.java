@@ -101,6 +101,7 @@ public class DnaToRna {
 		  buildingDNA.append((char)in.read());
 		}
 		this.DNA = rb.build(buildingDNA.toString());
+		in.close();
 	  } catch (IOException e) {
 	    System.out.println("Problem with reading from Endo's DNA file.");
 	    e.printStackTrace();
@@ -134,8 +135,8 @@ public class DnaToRna {
 	public void execute()
 	  {
 		int iteration = 0;
-		long startTime = System.currentTimeMillis();
-	    while(!finish && (System.currentTimeMillis() - startTime < 10000))
+		//long startTime = System.currentTimeMillis();
+	    while(!finish) // && (System.currentTimeMillis() - startTime < 10000))
 	    {
 	      if (logging == LogLevel.ITERATIONS) System.out.println("Onto iteration "+iteration);
 	      if (logging == LogLevel.TRACE) writeLog("iteration "+iteration+"\n");
