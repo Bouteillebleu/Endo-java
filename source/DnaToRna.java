@@ -134,8 +134,8 @@ public class DnaToRna {
 	public void execute()
 	  {
 		int iteration = 0;
-		//long startTime = System.currentTimeMillis();
-	    while(!finish) // && (System.currentTimeMillis() - startTime < 10000))
+		long startTime = System.currentTimeMillis();
+	    while(!finish && (System.currentTimeMillis() - startTime < 10000))
 	    {
 	      if (logging == LogLevel.ITERATIONS) System.out.println("Onto iteration "+iteration);
 	      if (logging == LogLevel.TRACE) writeLog("iteration "+iteration+"\n");
@@ -182,42 +182,43 @@ public class DnaToRna {
 	  {
 	    Rope p = e;
 	    int level = 0;
-	    while(DNA.length() > 0 && !finish)
+	    int index = 0; // Traverse the DNA string with this, then delete up to it before we leave the function.
+	    while(DNA.length() > index && !finish)
 	    {
-	      char charFirst = DNA.charAt(0);
+	      char charFirst = DNA.charAt(index);
 	      switch (charFirst)
 	      {
 	        case 'C':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append I)");
 		      if (logging == LogLevel.VERBOSE) writeLog("I");
-	          DNA = DNA.delete(0,1);
+	          index += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("I");
 	          break;	  
 	        case 'F':
 			  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append C)");
 		      if (logging == LogLevel.VERBOSE) writeLog("C");
-		      DNA = DNA.delete(0,1);
+		      index += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("C");
 	          break;
 	        case 'P':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append F)");
 		      if (logging == LogLevel.VERBOSE) writeLog("F");
-		      DNA = DNA.delete(0,1);
+		      index += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("F");
 	          break;
 	        case 'I':
-	          char charSecond = DNA.charAt(1);
+	          char charSecond = DNA.charAt(index+1);
 	          switch (charSecond)
 	          {
 	            case 'C':
 	  		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append P)");
 			      if (logging == LogLevel.VERBOSE) writeLog("P");
-	              DNA = DNA.delete(0,2);
+			      index += 2; //DNA = DNA.delete(0,2);
 	              p = p.append("P");
 	              break;
 	            case 'P':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append nat)");
-	              DNA = DNA.delete(0,2);
+	              index += 2; //DNA = DNA.delete(0,2);
 	              int n = nat();
 	              if (logging == LogLevel.VERBOSE) writeLog("{"+n+"}");
 	              if (finish) break;
@@ -228,7 +229,7 @@ public class DnaToRna {
 	              break;	      
 	            case 'F':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append seq)");
-	              DNA = DNA.delete(0,3);
+	              index += 3; //DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
 	              Rope s = consts();
 	              if (logging == LogLevel.VERBOSE) writeLog("["+s.toString()+"]");
@@ -238,28 +239,28 @@ public class DnaToRna {
 	              p = p.append("]");
 	              break;
 	            case 'I':
-	              char charThird = DNA.charAt(2);
+	              char charThird = DNA.charAt(index+2);
 	              switch (charThird)
 	              {
 	                case 'P':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (level +)");
 	                  if (logging == LogLevel.VERBOSE) writeLog("(");
-	                  DNA = DNA.delete(0,3);
+	                  index += 3; //DNA = DNA.delete(0,3);
 	                  level++;
 	                  p = p.append("(");
 	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (level -)");
-	                  DNA = DNA.delete(0,3);
-	                  if (level == 0) return p;
+	                  index += 3; //DNA = DNA.delete(0,3);
+	                  if (level == 0) { DNA = DNA.delete(0,index); return p; }
 	                  else { level--; p = p.append(")"); }
 	                  if (logging == LogLevel.VERBOSE) writeLog(")");
 	                  break;
 	                case 'I':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (write RNA)");
 	                  RNA = RNA.append(DNA.subSequence(3,10));
-	                  DNA = DNA.delete(0,10);
+	                  index += 10; //DNA = DNA.delete(0,10);
 	                  break;
 	                default:
 	                  finish = true;
@@ -276,6 +277,7 @@ public class DnaToRna {
 	          break;
 	      }
 	    }
+	    DNA = DNA.delete(0,index);
 	    return p;
 	  }
 
