@@ -220,6 +220,8 @@ public class DnaToRna {
 	            case 'P':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append nat)");
 	              index += 2; //DNA = DNA.delete(0,2);
+	              // Before we leave the function, we delete the DNA up to index and reset index.
+	              DNA = DNA.delete(0,index); index = 0;
 	              int n = nat();
 	              if (logging == LogLevel.VERBOSE) writeLog("{"+n+"}");
 	              if (finish) break;
@@ -232,6 +234,8 @@ public class DnaToRna {
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append seq)");
 	              index += 3; //DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
+	              // Before we leave the function, we delete the DNA up to index and reset index.
+	              DNA = DNA.delete(0,index); index = 0;
 	              Rope s = consts();
 	              if (logging == LogLevel.VERBOSE) writeLog("["+s.toString()+"]");
 	              // Add "Search for the sequence s" as "[s]".
@@ -260,7 +264,7 @@ public class DnaToRna {
 	                  break;
 	                case 'I':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (write RNA)");
-	                  RNA = RNA.append(DNA.subSequence(3,10));
+	                  RNA = RNA.append(DNA.subSequence(index+3,index+10));
 	                  index += 10; //DNA = DNA.delete(0,10);
 	                  break;
 	                default:
