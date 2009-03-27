@@ -460,7 +460,7 @@ public class DnaToRna {
 			    	}
 			    	pat = pat.delete(0,1); // gets rid of the ']'.
 			    	int firstMatch = DNA.indexOf(s.toString(),index) + s.length();
-			    	if (firstMatch >= index) // This covers case where firstMatch is -1, i.e. no match
+			    	if (firstMatch >= s.length() && firstMatch >= index) // This covers case where firstMatch is -1, i.e. no match
 			    	{
 			    		index = firstMatch;
 			    	}
