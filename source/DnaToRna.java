@@ -68,7 +68,7 @@ public class DnaToRna {
 		}
 		
 		d2r.execute();
-		if (d2r.logging != LogLevel.NONE)
+		if (d2r.logging == LogLevel.VERBOSE || d2r.logging == LogLevel.OVERLYVERBOSE)
 		{
 			try { 
 				d2r.debugbuf.close();
@@ -135,7 +135,7 @@ public class DnaToRna {
 	  {
 		int iteration = 0;
 		//long startTime = System.currentTimeMillis();
-	    while(!finish) // && (System.currentTimeMillis() - startTime < 10000))
+	    while(!finish && DNA.length() > 0) // && (System.currentTimeMillis() - startTime < 10000))
 	    {
 	      if (logging == LogLevel.ITERATIONS) System.out.println("Onto iteration "+iteration);
 	      if (logging == LogLevel.TRACE) writeLog("iteration "+iteration+"\n");
@@ -786,7 +786,8 @@ public class DnaToRna {
 	  
 	  private void finish()
 	  {
-		  if (logging != LogLevel.NONE) writeLog("Finished processing (writing RNA to file)");
+		  if (logging == LogLevel.VERBOSE || logging == LogLevel.OVERLYVERBOSE)
+			  writeLog("Finished processing (writing RNA to file)");
 	    // Outputs RNA string to file endo.rna.
 		try {
 		  BufferedWriter buf = new BufferedWriter(new FileWriter(outputFilename));
