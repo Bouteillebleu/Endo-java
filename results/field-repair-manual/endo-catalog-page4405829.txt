@@ -1,0 +1,25 @@
+Shhaf pbagnva n terng qrny bs cebcevrgnel grpuabybtl. Gb cebgrpg gur Vagryyrpghny Cebcregl evtugf bs ShhaGrpu naq vgf fgbpxubyqref, pregnva cnegf bs n Shha'f QAN ner rapelcgrq hfvat bar bs gjb pelcgbtencuvp grpuabybtvrf. Guvf ranoyrf fhpu cnegf gb or npprffrq bayl ol gubfr phfgbzref jub unir bognvarq gur arprffnel npprff pbqrf.
+
+Zrgubq N jnf hfrq va gur cnfg, ohg vg unf erpragyl orra oebxra. Vaqrrq, gur rapelcgvba fpurzr jnf erirnyrq gb or fb synjrq gung vg pna or oebzra znahnyyl. Vg vf fgvyy va hfr sbe fbzr cnegf bs gur flfgrz, ohg ShhaGrpu vf zvtengvat njnl sebz vg. Jr jvyy abg qvgphff vg shegure.
+
+Zrgubq O, n ShhaGrpu genqr frperg, vf fvtavsvpnagyl zber cbjreshy. Vg erdhverf gur phfgbzre gb rapbqr n fcrpvny frdhrapr bs punenpgref, pnyyrq n "xrl", vagb uvf Shha'f QAN ng n fcrpvsvp ybpngvba. Vs gur xrl vf cerfrag, gur pbeerfcbaqvat shapgvbanyvgl orpbzrf ninvynoyr. Bgurejvfr, Shha orunivbhe znl enatr sebz na reebe zrffntr gb ivbyrag qrngu.
+
+Vs lbh unir ybfg n xrl, erpbirel bs gur xrl vf abg trarenyyl cbffvoyr qhr gb gur pbzcyrkvgl bs gur pelcgbtencuvp grpuabybtl. (Vg vf n tbbq vqrn gb jevgr qbja xrlf fbzrjurer, znlor rira ba n lryybj cvrpr bs cncre nggnpurq gb lbhe pbzchgvat qrivpr.) Ubjrire, vs lbhe xrl vf fhssvpvragyl fubeg, lbh znl or noyr gb erpbire vg hfvat gur Shha'f xrl penpxre. Gb or noyr gb hfr gur penpxre, lbh zhfg fgvyy unir lbhe chepunfr pbqr (n 24-npvq frdhrapr). Cyrnfr npgvingr gur penpxre trar, cnffvat vg gur chepunfr pbqr, naq nsgre fbzr crevbq bs gvzr vg znl cevag lbhe xrl. Or cercnerq gb jnvg n ybat gvzr. Va gur Fybj Mbar, penpxvat n 2-punenpgre xrl znl gnxr zvahgrf, juvyr n 3-punenpgre xrl znl gnxr ubhef.
+
+*** Qrgnvyrq qrfpevcgvba bs Zrgubq O (fhowrpg gb AQN) ***
+
+1. Znxr n yvfg bs ahzoref, 0 gb 255.
+
+2. Frg gur pbhagre /sbb/ gb mreb.
+
+3. Yrg /one/ pbhag sebz 0 gb 255 naq rnpu gvzr, nqq gur /one/'gu ryrzrag bs gur yvfg naq gur /one/'gu punenpgre bs gur xrl (jenccvat nebhaq gb gur fgneg bs gur xrl vs arprffnel) gb /sbb/, naq fjnc gur /sbb/'gu naq /one/'gu ryrzragf bs gur yvfg.
+
+4. Erfrg /sbb/ naq /one/ gb mreb.
+
+5. Sbe nyy gur qngn lbh jnag gb rapelcg be qrpelcg:
+
+    N. Vapernfr /sbb/, nqq gb /one/ gur /sbb/'gu ryrzrag bs gur yvfg, gura fjnc gur /sbb/'gu naq /one/'gu ryrzragf.
+    
+    O. Nqq gubfr gjb ryrzragf, fcyvg gur erfhyg vagb sbhe tebhcf, naq KBE gurz jvgu gur npvqf (V = 0, P = 1, S = 2, C = 3).
+
+Nyy nevguzrgvp fubhyq or qbar jvgu 8 fvtavsvpnag npvqf.
