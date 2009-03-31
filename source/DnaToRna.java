@@ -20,6 +20,7 @@ public class DnaToRna {
 	public static final Rope e = rb.build("");
 	private Rope DNA = e;
 	private Rope RNA = e;
+	private int DNAindex = 0;
 	private boolean finish = false;
 	private String outputFilename;
 	private BufferedWriter debugbuf;
@@ -123,7 +124,15 @@ public class DnaToRna {
 	{
 		this.DNA = rb.build(newDNA);
 	}
-
+	
+	/*
+	 * Deletes DNA up to DNAindex, and resets DNAindex.
+	 */
+	public void deleteDNAuptoIndex()
+	{
+		DNA = DNA.delete(0,DNAindex);
+		DNAindex = 0;
+	}
 	/*
 	 * Get the current contents of RNA. Used for testing.
 	 */
@@ -144,6 +153,7 @@ public class DnaToRna {
 	    		  +DNA.subSequence(0,Math.min(10,DNA.length()))
 	    		  +(DNA.length()>10 ? "... " : " ")
 	    		  +"("+DNA.length()+" bases)\n");
+		  DNAindex = 0;
 	      // Define a pattern type, set it to p.
 	      Rope p = pattern();
 	      if (logging == LogLevel.TRACE) writeLog("pattern "
@@ -154,6 +164,7 @@ public class DnaToRna {
 	      if (logging == LogLevel.TRACE) writeLog("template "
 	    		  +t.toString()+"\n");
 	      if(finish) break;
+	      deleteDNAuptoIndex();
 	      matchreplace(p,t);
 	      if (logging == LogLevel.TRACE) writeLog("len(rna) = "
 	    		  +RNA.length()/7+"\n");
@@ -183,45 +194,42 @@ public class DnaToRna {
 	  {
 	    Rope p = e;
 	    int level = 0;
-	    int index = 0; // Traverse the DNA string with this, then delete up to it before we leave the function.
-	    while(DNA.length() > index && !finish)
+	    while(DNAindex < DNA.length() && !finish)
 	    {
-	      char charFirst = DNA.charAt(index);
+	      char charFirst = DNA.charAt(DNAindex);
 	      switch (charFirst)
 	      {
 	        case 'C':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append I)");
 		      if (logging == LogLevel.VERBOSE) writeLog("I");
-	          index += 1; //DNA = DNA.delete(0,1);
+		      DNAindex += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("I");
 	          break;	  
 	        case 'F':
 			  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append C)");
 		      if (logging == LogLevel.VERBOSE) writeLog("C");
-		      index += 1; //DNA = DNA.delete(0,1);
+		      DNAindex += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("C");
 	          break;
 	        case 'P':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append F)");
 		      if (logging == LogLevel.VERBOSE) writeLog("F");
-		      index += 1; //DNA = DNA.delete(0,1);
+		      DNAindex += 1; //DNA = DNA.delete(0,1);
 	          p = p.append("F");
 	          break;
 	        case 'I':
-	          char charSecond = DNA.charAt(index+1);
+	          char charSecond = DNA.charAt(DNAindex+1);
 	          switch (charSecond)
 	          {
 	            case 'C':
 	  		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append P)");
 			      if (logging == LogLevel.VERBOSE) writeLog("P");
-			      index += 2; //DNA = DNA.delete(0,2);
+			      DNAindex += 2; //DNA = DNA.delete(0,2);
 	              p = p.append("P");
 	              break;
 	            case 'P':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append nat)");
-	              index += 2; //DNA = DNA.delete(0,2);
-	              // Before we leave the function, we delete the DNA up to index and reset index.
-	              DNA = DNA.delete(0,index); index = 0;
+	              DNAindex += 2; //DNA = DNA.delete(0,2);
 	              int n = nat();
 	              if (logging == LogLevel.VERBOSE) writeLog("{"+n+"}");
 	              if (finish) break;
@@ -232,10 +240,8 @@ public class DnaToRna {
 	              break;	      
 	            case 'F':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (append seq)");
-	              index += 3; //DNA = DNA.delete(0,3);
+	              DNAindex += 3; //DNA = DNA.delete(0,3);
 	              // Interpret next part as encoded sequence of bases.
-	              // Before we leave the function, we delete the DNA up to index and reset index.
-	              DNA = DNA.delete(0,index); index = 0;
 	              Rope s = consts();
 	              if (logging == LogLevel.VERBOSE) writeLog("["+s.toString()+"]");
 	              // Add "Search for the sequence s" as "[s]".
@@ -244,28 +250,28 @@ public class DnaToRna {
 	              p = p.append("]");
 	              break;
 	            case 'I':
-	              char charThird = DNA.charAt(index+2);
+	              char charThird = DNA.charAt(DNAindex+2);
 	              switch (charThird)
 	              {
 	                case 'P':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (level +)");
 	                  if (logging == LogLevel.VERBOSE) writeLog("(");
-	                  index += 3; //DNA = DNA.delete(0,3);
+	                  DNAindex += 3; //DNA = DNA.delete(0,3);
 	                  level++;
 	                  p = p.append("(");
 	                  break;
 	                case 'C': /* FALL THRU */
 	                case 'F':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (level -)");
-	                  index += 3; //DNA = DNA.delete(0,3);
-	                  if (level == 0) { DNA = DNA.delete(0,index); return p; }
+	                  DNAindex += 3; //DNA = DNA.delete(0,3);
+	                  if (level == 0) { return p; }
 	                  else { level--; p = p.append(")"); }
 	                  if (logging == LogLevel.VERBOSE) writeLog(")");
 	                  break;
 	                case 'I':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Pattern (write RNA)");
-	                  RNA = RNA.append(DNA.subSequence(index+3,index+10));
-	                  index += 10; //DNA = DNA.delete(0,10);
+	                  RNA = RNA.append(DNA.subSequence(DNAindex+3,DNAindex+10));
+	                  DNAindex += 10; //DNA = DNA.delete(0,10);
 	                  break;
 	                default:
 	                  finish = true;
@@ -282,7 +288,6 @@ public class DnaToRna {
 	          break;
 	      }
 	    }
-	    DNA = DNA.delete(0,index);
 	    return p;
 	  }
 
@@ -299,48 +304,48 @@ public class DnaToRna {
 	  {
 		if (logging == LogLevel.VERBOSE) writeLog(" -> ");
 	    Rope t = e;
-	    while(DNA.length() > 0 && !finish)
+	    while(DNAindex < DNA.length() && !finish)
 	    {
-	      if (DNA.length() == 0)
+	      if (DNA.length() == DNAindex)
 	      {
 	    	  finish = true;
 	    	  return e;
 	      }
-	      char charFirst = DNA.charAt(0);
+	      char charFirst = DNA.charAt(DNAindex);
 	      switch (charFirst)
 	      {
 	        case 'C':
 	          if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (append I)");
 	          if (logging == LogLevel.VERBOSE) writeLog("I");
-	          DNA = DNA.delete(0,1);
+	          DNAindex += 1; //DNA = DNA.delete(0,1);
 	          t = t.append("I");
 	          break;	  
 	        case 'F':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (append C)");
 		      if (logging == LogLevel.VERBOSE) writeLog("C");
-	          DNA = DNA.delete(0,1);
+		      DNAindex += 1; //DNA = DNA.delete(0,1);
 	          t = t.append("C");
 	          break;
 	        case 'P':
 		      if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (append F)");
 		      if (logging == LogLevel.VERBOSE) writeLog("F");
-	          DNA = DNA.delete(0,1);
+		      DNAindex += 1; //DNA = DNA.delete(0,1);
 	          t = t.append("F");
 	          break;
 	        case 'I':
-	          char charSecond = DNA.charAt(1);
+	          char charSecond = DNA.charAt(DNAindex+1);
 	          switch (charSecond)
 	          {
 	            case 'C':
 	  	          if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (append P)");
 		          if (logging == LogLevel.VERBOSE) writeLog("P");
-	              DNA = DNA.delete(0,2);
+		          DNAindex +=2; //DNA = DNA.delete(0,2);
 	              t = t.append("P");
 	              break;
 	            case 'F': /* FALL THRU */
 	            case 'P':
 	              if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (reference)");
-	              DNA = DNA.delete(0,2);
+	              DNAindex += 2; //DNA = DNA.delete(0,2);
 	              int level = nat();
 	              if (finish) break;
 	              int n = nat();
@@ -353,18 +358,18 @@ public class DnaToRna {
 	              if (logging == LogLevel.VERBOSE) writeLog("<"+n+"_"+level+">");
 	              break;
 	            case 'I':
-	              char charThird = DNA.charAt(2);
+	              char charThird = DNA.charAt(DNAindex+2);
 	              switch (charThird)
 	              {
 	                case 'C': /* FALL THRU */
 	                case 'F':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (end)");
 	                  if (logging == LogLevel.VERBOSE) writeLog("\n");
-	                  DNA = DNA.delete(0,3);
+	                  DNAindex +=3; //DNA = DNA.delete(0,3);
 	                  return t;
 	                case 'P':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (length)");
-	                  DNA = DNA.delete(0,3);
+	                  DNAindex += 3; //DNA = DNA.delete(0,3);
 		              int m = nat();
 		              if (finish) break;
 	                  t = t.append("|");
@@ -374,8 +379,8 @@ public class DnaToRna {
 	                  break;
 	                case 'I':
 	                  if (logging == LogLevel.OVERLYVERBOSE) writeLog("Template (write RNA)");
-	                  RNA = RNA.append(DNA.subSequence(3,10));
-	                  DNA = DNA.delete(0,10);
+	                  RNA = RNA.append(DNA.subSequence(DNAindex+3,DNAindex+10));
+	                  DNAindex +=10; //DNA = DNA.delete(0,10);
 	                  break;
 	                default:
 	                  finish = true;
@@ -412,11 +417,12 @@ public class DnaToRna {
 	  public ArrayList<Rope> matchreplace(Rope pat, Rope t)
 	  {
 		  int index = 0;
+		  int pIndex = 0;
 		  ArrayList<Rope> environment = new ArrayList<Rope>();
 		  ArrayList<Integer> openItems = new ArrayList<Integer>();
-		  while (pat.length() > 0)
+		  while (pIndex < pat.length())
 		  {
-			  char currentChar = pat.charAt(0);
+			  char currentChar = pat.charAt(pIndex);
 			  switch(currentChar)
 			  {
 			    case 'I': /* FALL THRU */
@@ -424,7 +430,7 @@ public class DnaToRna {
 			    case 'F': /* FALL THRU */
 			    case 'P':
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Matching (base)");
-			    	pat = pat.delete(0,1);
+			    	pIndex++;
 			    	if (DNA.charAt(index) == currentChar)
 			    	{
 			    		index++;
@@ -438,17 +444,17 @@ public class DnaToRna {
 			    case '{':
 			    	// Deal with skip case.
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Matching (skip)");
-			    	pat = pat.delete(0,1); // gets rid of the '{'.
-			    	char nextChar = pat.charAt(0);
+			    	pIndex++; // gets rid of the '{'.
+			    	char nextChar = pat.charAt(pIndex);
 			    	int n = 0;
 			    	while (nextChar!='}') {
 			    	  n = (n*10) + Character.digit(nextChar,10);
-			    	  pat = pat.delete(0,1);
-			    	  nextChar = pat.charAt(0);
+			    	  pIndex++;
+			    	  nextChar = pat.charAt(pIndex);
 			    	}
-			    	pat = pat.delete(0,1); // gets rid of the '}'.
+			    	pIndex++; // gets rid of the '}'.
 			    	index += n;
-			    	if (index >= DNA.length())
+			    	if (index > DNA.length())
 			    	{
 			    		if (logging == LogLevel.TRACE) writeLog("failed match\n");
 			    		return environment;
@@ -458,14 +464,14 @@ public class DnaToRna {
 			    	// Deal with search case.
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Matching (search)");
 			    	StringBuilder s = new StringBuilder();
-			    	pat = pat.delete(0,1); // gets rid of the '['.
-			    	nextChar = pat.charAt(0);
+			    	pIndex++; // gets rid of the '['.
+			    	nextChar = pat.charAt(pIndex);
 			    	while (nextChar!=']') {
 			    	  s.append(nextChar);
-			    	  pat = pat.delete(0,1);
-			    	  nextChar = pat.charAt(0);
+			    	  pIndex++;
+			    	  nextChar = pat.charAt(pIndex);
 			    	}
-			    	pat = pat.delete(0,1); // gets rid of the ']'.
+			    	pIndex++; // gets rid of the ']'.
 			    	int firstMatch = DNA.indexOf(s.toString(),index) + s.length();
 			    	if (firstMatch >= s.length() && firstMatch >= index) // This covers case where firstMatch is -1, i.e. no match
 			    	{
@@ -480,13 +486,13 @@ public class DnaToRna {
 			    case '(':
 			    	// Deal with opening group.
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Matching (group open)");
-			    	pat = pat.delete(0,1); // gets rid of the '('.
+			    	pIndex++; // gets rid of the '('.
 			    	openItems.add(0,index);
 			    	break;
 			    case ')':
 			    	// Deal with closing group.
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Matching (group close)");
-			    	pat = pat.delete(0,1); // gets rid of the ')'.
+			    	pIndex++; // gets rid of the ')'.
 			    	environment.add(DNA.subSequence(openItems.get(0),index));
 			    	openItems.remove(0);
 			    	break;
@@ -522,10 +528,11 @@ public class DnaToRna {
 	   */
 	  public void replace(Rope t,ArrayList<Rope> environment)
 	  {
-		  Rope r = e; 
-		  while (t.length() > 0)
+		  Rope r = e;
+		  int tIndex = 0;
+		  while (tIndex < t.length())
 		  {
-			  char currentChar = t.charAt(0);
+			  char currentChar = t.charAt(tIndex);
 			  switch(currentChar)
 			  {
 			  	case 'I': /* FALL THRU */
@@ -533,28 +540,28 @@ public class DnaToRna {
 			  	case 'F': /* FALL THRU */
 			  	case 'P':
 			  		if (logging == LogLevel.OVERLYVERBOSE) writeLog("Replacing (base)");
-			  		t = t.delete(0,1);  
+			  		tIndex++;  
 			  		r = r.append(currentChar);
 			  		break;
 			  	case '<':
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Replacing (reference)");
-			  		t = t.delete(0,1); // gets rid of the '<'.
-			    	char nextChar = t.charAt(0);
+			    	tIndex++; // gets rid of the '<'.
+			    	char nextChar = t.charAt(tIndex);
 			    	int n = 0;
 			    	while (nextChar!='_') {
 			    	  n = (n*10) + Character.digit(nextChar,10);
-			    	  t = t.delete(0,1);
-			    	  nextChar = t.charAt(0);
+			    	  tIndex++;
+			    	  nextChar = t.charAt(tIndex);
 			    	}
-			    	t = t.delete(0,1); // gets rid of the '_'.
-			    	nextChar = t.charAt(0);
+			    	tIndex++; // gets rid of the '_'.
+			    	nextChar = t.charAt(tIndex);
 			    	int l = 0;
 			    	while (nextChar!='>') {
 			    	  l = (l*10) + Character.digit(nextChar,10);
-			    	  t = t.delete(0,1);
-			    	  nextChar = t.charAt(0);
+			    	  tIndex++;
+			    	  nextChar = t.charAt(tIndex);
 			    	}
-			    	t = t.delete(0,1); // gets rid of the '>'.
+			    	tIndex++; // gets rid of the '>'.
 			    	if (n < environment.size())
 			    	{
 				    	r = r.append(protect(l,environment.get(n)));			    		
@@ -566,15 +573,15 @@ public class DnaToRna {
 			    	break;
 			  	case '|':
 			    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("Replacing (length)");
-			  		t = t.delete(0,1); // gets rid of the initial '|'.
-			    	nextChar = t.charAt(0);
+			    	tIndex++; // gets rid of the initial '|'.
+			    	nextChar = t.charAt(tIndex);
 			    	n = 0;
 			    	while (nextChar!='|') {
 			    	  n = (n*10) + Character.digit(nextChar,10);
-			    	  t = t.delete(0,1);
-			    	  nextChar = t.charAt(0);
+			    	  tIndex++;
+			    	  nextChar = t.charAt(tIndex);
 			    	}
-			    	t = t.delete(0,1); // gets rid of the final '|'.
+			    	tIndex++; // gets rid of the final '|'.
 			    	if (n < environment.size())
 			    	{
 			    		r = r.append(asnat(environment.get(n).length()));
@@ -602,17 +609,17 @@ public class DnaToRna {
 	  {
 		  // Iterative version. Read up to number terminator, then process rope.
 		  StringBuilder buildingNumber = new StringBuilder();
-		  while(DNA.length() > 0 && DNA.charAt(0)!='P')
+		  while(DNAindex < DNA.length() && DNA.charAt(DNAindex)!='P')
 		  {
-			  buildingNumber.append(DNA.charAt(0));
-			  DNA = DNA.delete(0,1);
+			  buildingNumber.append(DNA.charAt(DNAindex));
+			  DNAindex +=1; //DNA = DNA.delete(0,1);
 		  }
-		  if (DNA.length() == 0)
+		  if (DNA.length() == DNAindex)
 		  {
 			  finish = true;
 			  return 0;
 		  }
-		  DNA = DNA.delete(0,1); // to remove the terminating P...
+		  DNAindex +=1; //DNA = DNA.delete(0,1); // to remove the terminating P...
 		  Rope number = rb.build(buildingNumber); // ...which this rope doesn't include.
 		  if (number.equals(e))
 		  {
@@ -681,42 +688,39 @@ public class DnaToRna {
 	  public Rope consts()
 	  {
 		Rope decoded = e;
-		int index = 0;
-		while(DNA.length()>0)
+		while(DNAindex < DNA.length())
 		{
-			switch (DNA.charAt(index))
+			switch (DNA.charAt(DNAindex))
 			{
 			  case 'C':
 		    	if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding I)");
-				index += 1; //DNA = DNA.delete(0,1);
+		    	DNAindex += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("I");
 				break;
 			  case 'F':
 				if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding C)");
-				index += 1; //DNA = DNA.delete(0,1);
+				DNAindex += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("C");
 				break;
 			  case 'P':
 				if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding F)");
-				index += 1; //DNA = DNA.delete(0,1);
+				DNAindex += 1; //DNA = DNA.delete(0,1);
 				decoded = decoded.append("F");
 				break;
 			  case 'I':
-				if (DNA.charAt(1) == 'C')
+				if (DNA.charAt(DNAindex+1) == 'C')
 				{
 					if (logging == LogLevel.OVERLYVERBOSE) writeLog("consts (adding P)");
-					index += 2; //DNA = DNA.delete(0,2);
+					DNAindex += 2; //DNA = DNA.delete(0,2);
 					decoded = decoded.append("P");
 				}
 				else
 				{
-					DNA = DNA.delete(0,index);
 					return decoded;
 				}
 			}
 		}
 		finish = true;
-		DNA = DNA.delete(0,index);
 		return decoded;
 
 		/*

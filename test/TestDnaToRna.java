@@ -31,7 +31,7 @@ public class TestDnaToRna extends TestCase {
 	 * TODO: Find a way to specify filenames without absolute paths.
 	 */
 	public void testDnaToRna_verify() {
-		dna2rna = new DnaToRna("","C:/Coding/Endo/resources/endo.dna","");
+		dna2rna = new DnaToRna("","D:/Coding/Endo/resources/endo.dna","");
 		Assert.assertFalse(dna2rna.getDNA().equals(DnaToRna.e));
 	}
 	
@@ -40,7 +40,7 @@ public class TestDnaToRna extends TestCase {
 	 * and sets the DNA string as a result to the prefix.
 	 */
 	public void testDnaToRna_prefix_emptyFile() {
-		dna2rna = new DnaToRna("ICFPICFPICFP","C:/Coding/Endo/resources/empty.dna","");
+		dna2rna = new DnaToRna("ICFPICFPICFP","D:/Coding/Endo/resources/empty.dna","");
 		Assert.assertEquals("ICFPICFPICFP",dna2rna.getDNA().toString());
 	}
 
@@ -197,6 +197,7 @@ public class TestDnaToRna extends TestCase {
 		Assert.assertEquals("P([ICFP])P",p.toString());
 		Rope t = dna2rna.template(); // "IFPPIFPPIIC"
 		Assert.assertEquals("<0_0><0_0>",t.toString());
+		dna2rna.deleteDNAuptoIndex();
 		ArrayList<Rope> env = dna2rna.matchreplace(p,t);
 		Assert.assertEquals(1,env.size());
 		Assert.assertEquals("ICFP",env.get(0).toString());
@@ -215,6 +216,7 @@ public class TestDnaToRna extends TestCase {
 		Assert.assertEquals("P([ICFP])P",p.toString());
 		Rope t = dna2rna.template(); // "IFPPIFPPIIC"
 		Assert.assertEquals("<0_0><0_0>",t.toString());
+		dna2rna.deleteDNAuptoIndex();
 		ArrayList<Rope> env = dna2rna.matchreplace(p,t);
 		Assert.assertEquals(1,env.size());
 		Assert.assertEquals("IIFFFICFP",env.get(0).toString());
@@ -231,6 +233,7 @@ public class TestDnaToRna extends TestCase {
 	    Assert.assertEquals("({2})P",p.toString());
 	    Rope t = dna2rna.template();
 	    Assert.assertEquals("PI<0_0>",t.toString());
+	    dna2rna.deleteDNAuptoIndex();
 	    dna2rna.matchreplace(p,t);
 	    Assert.assertEquals("PICFC",dna2rna.getDNA().toString());
 	}
@@ -246,6 +249,7 @@ public class TestDnaToRna extends TestCase {
 	    Assert.assertEquals("({2})P",p.toString());
 	    Rope t = dna2rna.template();
 	    Assert.assertEquals("PI<0_7>",t.toString());
+	    dna2rna.deleteDNAuptoIndex();
 	    dna2rna.matchreplace(p,t);
 	    Assert.assertEquals("PIICCFCFFPC",dna2rna.getDNA().toString());
 	}
@@ -261,6 +265,7 @@ public class TestDnaToRna extends TestCase {
 	    Assert.assertEquals("({4})",p.toString());
 	    Rope t = dna2rna.template();
 	    Assert.assertEquals("I",t.toString());
+	    dna2rna.deleteDNAuptoIndex();
 	    dna2rna.matchreplace(p,t);
 	    Assert.assertEquals("I",dna2rna.getDNA().toString());
 	}
