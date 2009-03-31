@@ -208,7 +208,7 @@ public class RnaToImage {
 		}
 		if (logging)
 		{
-			if (currentBase.equals("PCCIFFP") ||
+			if (currentBase.equals("PFFICCP") ||
 				currentBase.equals("PIIPIIP") ||
 				currentBase.equals("PFFPCCP") ||
 				currentBase.equals("PFFICCF"))
