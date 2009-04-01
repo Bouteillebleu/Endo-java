@@ -1,0 +1,13 @@
+Decodings of prefixes:
+
+* "Something interesting" (self-check):
+([IFPP])F -> <0_0>P
+
+* Hidden prefix in the rendering:
+([IFPCFFP])I -> <0_0>C
+
+* Night into day:
+([IFPFI])P -> <0_0>F
+
+* Accessing Fuun field repair guide:
+([IFPCFFP])II -> <0_0>C
