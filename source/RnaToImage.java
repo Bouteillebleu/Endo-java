@@ -75,7 +75,7 @@ public class RnaToImage {
   public RnaToImage()
   {
 	bitmaps.add(new Bitmap());
-    this.rnaOutputFilename = "D:/Coding/Endo/endo.png";
+    this.rnaOutputFilename = "endo.png";
   }
   
   /*
@@ -86,7 +86,7 @@ public class RnaToImage {
   {
 	  bitmaps.add(new Bitmap());
 	  this.RNA = rb.build(rnaInput);
-      this.rnaOutputFilename = "D:/Coding/Endo/endo.png";
+      this.rnaOutputFilename = "endo.png";
   }
   
   public RnaToImage(String rnaInputFilename, String rnaOutputFilename)

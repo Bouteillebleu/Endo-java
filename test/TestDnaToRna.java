@@ -28,10 +28,10 @@ public class TestDnaToRna extends TestCase {
 	/*
 	 * Test that the DnaToRna constructor can read in a prefix and a non-zipped file, 
 	 * and sets the DNA string as a result.
-	 * TODO: Find a way to specify filenames without absolute paths.
+	 * Filenames are now relative (they are relative to the project directory rather than this script).
 	 */
 	public void testDnaToRna_verify() {
-		dna2rna = new DnaToRna("","D:/Coding/Endo/resources/endo.dna","");
+		dna2rna = new DnaToRna("","resources/endo.dna","");
 		Assert.assertFalse(dna2rna.getDNA().equals(DnaToRna.e));
 	}
 	
@@ -40,7 +40,7 @@ public class TestDnaToRna extends TestCase {
 	 * and sets the DNA string as a result to the prefix.
 	 */
 	public void testDnaToRna_prefix_emptyFile() {
-		dna2rna = new DnaToRna("ICFPICFPICFP","D:/Coding/Endo/resources/empty.dna","");
+		dna2rna = new DnaToRna("ICFPICFPICFP","resources/empty.dna","");
 		Assert.assertEquals("ICFPICFPICFP",dna2rna.getDNA().toString());
 	}
 

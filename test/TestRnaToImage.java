@@ -26,7 +26,7 @@ public class TestRnaToImage extends TestCase {
 	 * TODO: Find a way to specify filenames without absolute paths.
 	 */
 	public void testRnaToImage_verify() {
-		rna2image = new RnaToImage("D:/Coding/Endo/resources/endo.rna","");
+		rna2image = new RnaToImage("resources/endo.rna","");
 		Assert.assertFalse(rna2image.getRNA().equals(RnaToImage.e));
 	}
 	
@@ -36,7 +36,7 @@ public class TestRnaToImage extends TestCase {
 	 * the RNA string correctly.
 	 */
 	public void testRnaToImage_verifyContents() {
-		rna2image = new RnaToImage("D:/Coding/Endo/resources/short.rna","");
+		rna2image = new RnaToImage("resources/short.rna","");
 		Assert.assertEquals("PIPIIPCPFFFFFP",rna2image.getRNA().toString());
 	}
 
